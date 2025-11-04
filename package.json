@@ -5,7 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "ultracite lint",
+    "lint:fix": "ultracite fix",
     "start": "next start"
   },
   "dependencies": {

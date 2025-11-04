@@ -1,17 +1,17 @@
-import { redirect } from "next/navigation"
-import { getCurrentOrganization, ensureUserInDatabase } from "@/lib/auth"
-import { db } from "@/lib/db"
-import { formSubmissions, forms } from "@/lib/db/schema"
-import { eq, desc } from "drizzle-orm"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { SubmissionsList } from "@/components/submissions/submissions-list"
+import { desc, eq } from 'drizzle-orm'
+import { redirect } from 'next/navigation'
+import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+import { SubmissionsList } from '@/components/submissions/submissions-list'
+import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { formSubmissions, forms } from '@/lib/db/schema'
 
 export default async function SubmissionsPage() {
   await ensureUserInDatabase()
   const org = await getCurrentOrganization()
 
   if (!org) {
-    redirect("/sign-in")
+    redirect('/sign-in')
   }
 
   const submissions = await db
@@ -34,7 +34,7 @@ export default async function SubmissionsPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">All Submissions</h1>
+          <h1 className="font-bold text-3xl text-gray-900">All Submissions</h1>
         </div>
 
         <SubmissionsList submissions={submissions} />

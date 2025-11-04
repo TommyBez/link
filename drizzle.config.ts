@@ -1,10 +1,16 @@
-import { defineConfig } from "drizzle-kit"
+import { defineConfig } from 'drizzle-kit'
+
+const databaseUrl = process.env.NEON_DATABASE_URL
+
+if (!databaseUrl) {
+  throw new Error('NEON_DATABASE_URL environment variable is not set')
+}
 
 export default defineConfig({
-  schema: "./lib/db/schema.ts",
-  out: "./drizzle",
-  dialect: "postgresql",
+  schema: './lib/db/schema.ts',
+  out: './drizzle',
+  dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.NEON_DATABASE_URL!,
+    url: databaseUrl,
   },
 })

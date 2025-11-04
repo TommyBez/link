@@ -1,12 +1,18 @@
-"use server"
+'use server'
 
-import { db } from "@/lib/db"
-import { formSubmissions, submissionAnswers, forms, formFields, documents } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
-import { headers } from "next/headers"
-import { generateAndUploadPDF } from "@/lib/pdf/generate-pdf"
+import { eq } from 'drizzle-orm'
+import { headers } from 'next/headers'
+import { db } from '@/lib/db'
+import {
+  documents,
+  formFields,
+  formSubmissions,
+  forms,
+  submissionAnswers,
+} from '@/lib/db/schema'
+import { generateAndUploadPDF } from '@/lib/pdf/generate-pdf'
 
-interface SubmissionData {
+type SubmissionData = {
   formId: string
   clientName: string
   clientEmail: string
@@ -15,15 +21,22 @@ interface SubmissionData {
 
 export async function submitForm(data: SubmissionData) {
   // Get form to verify it exists and is active
-  const [form] = await db.select().from(forms).where(eq(forms.id, data.formId)).limit(1)
+  const [form] = await db
+    .select()
+    .from(forms)
+    .where(eq(forms.id, data.formId))
+    .limit(1)
 
-  if (!form || !form.isActive) {
-    throw new Error("Form not found or inactive")
+  if (!form?.isActive) {
+    throw new Error('Form not found or inactive')
   }
 
   // Get client IP address
   const headersList = await headers()
-  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown"
+  const ipAddress =
+    headersList.get('x-forwarded-for') ||
+    headersList.get('x-real-ip') ||
+    'unknown'
 
   // Create submission
   const [submission] = await db
@@ -33,21 +46,27 @@ export async function submitForm(data: SubmissionData) {
       organizationId: form.organizationId,
       clientName: data.clientName,
       clientEmail: data.clientEmail,
-      status: "completed",
+      status: 'completed',
       ipAddress,
     })
     .returning()
 
   // Get form fields to validate answers
-  const fields = await db.select().from(formFields).where(eq(formFields.formId, data.formId))
+  const fields = await db
+    .select()
+    .from(formFields)
+    .where(eq(formFields.formId, data.formId))
 
   // Create submission answers
   const answerValues = fields
-    .filter((field) => !["text_block", "heading", "divider"].includes(field.fieldType))
+    .filter(
+      (field) =>
+        !['text_block', 'heading', 'divider'].includes(field.fieldType),
+    )
     .map((field) => ({
       submissionId: submission.id,
       formFieldId: field.id,
-      answerValue: data.answers[field.id] || "",
+      answerValue: data.answers[field.id] || '',
     }))
 
   if (answerValues.length > 0) {
@@ -73,7 +92,10 @@ export async function submitForm(data: SubmissionData) {
     const pdfUrl = await generateAndUploadPDF(pdfData)
 
     // Update submission with PDF URL
-    await db.update(formSubmissions).set({ pdfUrl }).where(eq(formSubmissions.id, submission.id))
+    await db
+      .update(formSubmissions)
+      .set({ pdfUrl })
+      .where(eq(formSubmissions.id, submission.id))
 
     // Create document record
     await db.insert(documents).values({
@@ -81,8 +103,7 @@ export async function submitForm(data: SubmissionData) {
       organizationId: form.organizationId,
       fileUrl: pdfUrl,
     })
-  } catch (error) {
-    console.error("Failed to generate PDF:", error)
+  } catch (_error) {
     // Continue even if PDF generation fails
   }
 

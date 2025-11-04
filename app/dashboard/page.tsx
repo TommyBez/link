@@ -1,12 +1,14 @@
-import { redirect } from "next/navigation"
-import { getCurrentOrganization, ensureUserInDatabase } from "@/lib/auth"
-import { db } from "@/lib/db"
-import { forms, formSubmissions } from "@/lib/db/schema"
-import { eq, desc, count, sql } from "drizzle-orm"
-import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { RecentSubmissions } from "@/components/dashboard/recent-submissions"
-import { QuickActions } from "@/components/dashboard/quick-actions"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
+import { count, desc, eq, sql } from 'drizzle-orm'
+import { redirect } from 'next/navigation'
+import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+import { DashboardStats } from '@/components/dashboard/dashboard-stats'
+import { QuickActions } from '@/components/dashboard/quick-actions'
+import { RecentSubmissions } from '@/components/dashboard/recent-submissions'
+import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { formSubmissions, forms } from '@/lib/db/schema'
+
+const RECENT_SUBMISSIONS_LIMIT = 5
 
 export default async function DashboardPage() {
   // Ensure user is in database
@@ -14,11 +16,14 @@ export default async function DashboardPage() {
 
   const org = await getCurrentOrganization()
   if (!org) {
-    redirect("/sign-in")
+    redirect('/sign-in')
   }
 
   // Fetch dashboard statistics
-  const [formsCount] = await db.select({ count: count() }).from(forms).where(eq(forms.organizationId, org.id))
+  const [formsCount] = await db
+    .select({ count: count() })
+    .from(forms)
+    .where(eq(forms.organizationId, org.id))
 
   const [submissionsCount] = await db
     .select({ count: count() })
@@ -27,7 +32,9 @@ export default async function DashboardPage() {
 
   // Get unique clients count
   const [clientsCount] = await db
-    .select({ count: sql<number>`count(distinct ${formSubmissions.clientEmail})` })
+    .select({
+      count: sql<number>`count(distinct ${formSubmissions.clientEmail})`,
+    })
     .from(formSubmissions)
     .where(eq(formSubmissions.organizationId, org.id))
 
@@ -45,7 +52,7 @@ export default async function DashboardPage() {
     .leftJoin(forms, eq(formSubmissions.formId, forms.id))
     .where(eq(formSubmissions.organizationId, org.id))
     .orderBy(desc(formSubmissions.submittedAt))
-    .limit(5)
+    .limit(RECENT_SUBMISSIONS_LIMIT)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,13 +60,13 @@ export default async function DashboardPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="font-bold text-3xl text-gray-900">Dashboard</h1>
         </div>
 
         <DashboardStats
+          clientsCount={Number(clientsCount.count)}
           formsCount={formsCount.count}
           submissionsCount={submissionsCount.count}
-          clientsCount={Number(clientsCount.count)}
         />
 
         <div className="mt-8">

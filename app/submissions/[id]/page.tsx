@@ -1,13 +1,17 @@
-import { redirect } from "next/navigation"
-import { getCurrentOrganization, ensureUserInDatabase } from "@/lib/auth"
-import { db } from "@/lib/db"
-import { formSubmissions, forms, submissionAnswers, formFields } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
-import { notFound } from "next/navigation"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { SubmissionDetail } from "@/components/submissions/submission-detail"
+import { eq } from 'drizzle-orm'
+import { notFound, redirect } from 'next/navigation'
+import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+import { SubmissionDetail } from '@/components/submissions/submission-detail'
+import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { db } from '@/lib/db'
+import {
+  formFields,
+  formSubmissions,
+  forms,
+  submissionAnswers,
+} from '@/lib/db/schema'
 
-interface PageProps {
+type PageProps = {
   params: Promise<{ id: string }>
 }
 
@@ -16,7 +20,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   const org = await getCurrentOrganization()
 
   if (!org) {
-    redirect("/sign-in")
+    redirect('/sign-in')
   }
 
   const { id } = await params
@@ -58,7 +62,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
       <DashboardHeader organizationName={org.name} />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <SubmissionDetail submission={submission} answers={answers} />
+        <SubmissionDetail answers={answers} submission={submission} />
       </main>
     </div>
   )

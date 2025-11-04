@@ -1,19 +1,19 @@
-"use server"
+'use server'
 
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
-import { db } from "@/lib/db"
-import { forms, formFields } from "@/lib/db/schema"
-import { getCurrentOrganization, ensureUserInDatabase } from "@/lib/auth"
-import { eq } from "drizzle-orm"
-import type { FormData } from "@/lib/types/form"
+import { eq } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { formFields, forms } from '@/lib/db/schema'
+import type { FormData } from '@/lib/types/form'
 
 export async function createForm(formData: FormData) {
   const user = await ensureUserInDatabase()
   const org = await getCurrentOrganization()
 
   if (!org) {
-    throw new Error("No organization found")
+    throw new Error('No organization found')
   }
 
   // Create form
@@ -44,15 +44,15 @@ export async function createForm(formData: FormData) {
     )
   }
 
-  revalidatePath("/forms")
-  redirect("/forms")
+  revalidatePath('/forms')
+  redirect('/forms')
 }
 
 export async function updateForm(formId: string, formData: FormData) {
   const org = await getCurrentOrganization()
 
   if (!org) {
-    throw new Error("No organization found")
+    throw new Error('No organization found')
   }
 
   // Update form
@@ -85,19 +85,19 @@ export async function updateForm(formId: string, formData: FormData) {
     )
   }
 
-  revalidatePath("/forms")
+  revalidatePath('/forms')
   revalidatePath(`/forms/${formId}/edit`)
-  redirect("/forms")
+  redirect('/forms')
 }
 
 export async function deleteForm(formId: string) {
   const org = await getCurrentOrganization()
 
   if (!org) {
-    throw new Error("No organization found")
+    throw new Error('No organization found')
   }
 
   await db.delete(forms).where(eq(forms.id, formId))
 
-  revalidatePath("/forms")
+  revalidatePath('/forms')
 }

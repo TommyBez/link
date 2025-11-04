@@ -1,18 +1,18 @@
 export type FieldType =
-  | "text"
-  | "textarea"
-  | "email"
-  | "phone"
-  | "date"
-  | "checkbox"
-  | "radio"
-  | "select"
-  | "signature"
-  | "text_block"
-  | "heading"
-  | "divider"
+  | 'text'
+  | 'textarea'
+  | 'email'
+  | 'phone'
+  | 'date'
+  | 'checkbox'
+  | 'radio'
+  | 'select'
+  | 'signature'
+  | 'text_block'
+  | 'heading'
+  | 'divider'
 
-export interface FormField {
+export type FormField = {
   id: string
   fieldType: FieldType
   label: string
@@ -23,7 +23,7 @@ export interface FormField {
   validationRules?: Record<string, unknown>
 }
 
-export interface FormData {
+export type FormData = {
   id?: string
   title: string
   description: string

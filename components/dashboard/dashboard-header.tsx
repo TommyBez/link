@@ -1,38 +1,47 @@
-import { UserButton } from "@clerk/nextjs"
-import Link from "next/link"
+import { UserButton } from '@clerk/nextjs'
+import Link from 'next/link'
 
-interface DashboardHeaderProps {
+type DashboardHeaderProps = {
   organizationName: string
 }
 
 export function DashboardHeader({ organizationName }: DashboardHeaderProps) {
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header className="border-gray-200 border-b bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link className="flex items-center gap-2" href="/dashboard">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-                <span className="text-lg font-bold text-white">L</span>
+                <span className="font-bold text-lg text-white">L</span>
               </div>
-              <span className="text-xl font-semibold text-gray-900">Link</span>
+              <span className="font-semibold text-gray-900 text-xl">Link</span>
             </Link>
 
             <nav className="hidden md:flex md:gap-6">
-              <Link href="/dashboard" className="text-sm font-medium text-gray-700 hover:text-gray-900">
+              <Link
+                className="font-medium text-gray-700 text-sm hover:text-gray-900"
+                href="/dashboard"
+              >
                 Dashboard
               </Link>
-              <Link href="/forms" className="text-sm font-medium text-gray-700 hover:text-gray-900">
+              <Link
+                className="font-medium text-gray-700 text-sm hover:text-gray-900"
+                href="/forms"
+              >
                 Forms
               </Link>
-              <Link href="/submissions" className="text-sm font-medium text-gray-700 hover:text-gray-900">
+              <Link
+                className="font-medium text-gray-700 text-sm hover:text-gray-900"
+                href="/submissions"
+              >
                 Submissions
               </Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{organizationName}</span>
+            <span className="text-gray-600 text-sm">{organizationName}</span>
             <UserButton afterSignOutUrl="/sign-in" />
           </div>
         </div>
