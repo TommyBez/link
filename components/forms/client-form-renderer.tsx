@@ -44,7 +44,7 @@ function getInputType(fieldType: string): string {
 type FieldRendererProps = {
   field: FormField
   formData: Record<string, string>
-  errors: Record<string, string>
+  errors: Record<string, string | undefined>
   onFieldChange: (fieldId: string, value: string) => void
 }
 
@@ -71,7 +71,7 @@ function renderDivider(field: FormField) {
 function renderSignature(
   field: FormField,
   onFieldChange: (fieldId: string, value: string) => void,
-  errors: Record<string, string>,
+  errors: Record<string, string | undefined>,
 ) {
   return (
     <div className="space-y-2" key={field.id}>
@@ -93,7 +93,7 @@ function renderTextarea(
   field: FormField,
   formData: Record<string, string>,
   onFieldChange: (fieldId: string, value: string) => void,
-  errors: Record<string, string>,
+  errors: Record<string, string | undefined>,
 ) {
   return (
     <div className="space-y-2" key={field.id}>
@@ -119,7 +119,7 @@ function renderCheckbox(
   field: FormField,
   formData: Record<string, string>,
   onFieldChange: (fieldId: string, value: string) => void,
-  errors: Record<string, string>,
+  errors: Record<string, string | undefined>,
 ) {
   return (
     <div className="flex items-start gap-3" key={field.id}>
@@ -145,7 +145,7 @@ function renderRadio(
   field: FormField,
   formData: Record<string, string>,
   onFieldChange: (fieldId: string, value: string) => void,
-  errors: Record<string, string>,
+  errors: Record<string, string | undefined>,
 ) {
   return (
     <div className="space-y-2" key={field.id}>
@@ -177,7 +177,7 @@ function renderSelect(
   field: FormField,
   formData: Record<string, string>,
   onFieldChange: (fieldId: string, value: string) => void,
-  errors: Record<string, string>,
+  errors: Record<string, string | undefined>,
 ) {
   return (
     <div className="space-y-2" key={field.id}>
@@ -211,7 +211,7 @@ function renderTextInput(
   field: FormField,
   formData: Record<string, string>,
   onFieldChange: (fieldId: string, value: string) => void,
-  errors: Record<string, string>,
+  errors: Record<string, string | undefined>,
 ) {
   return (
     <div className="space-y-2" key={field.id}>
@@ -270,7 +270,7 @@ export function ClientFormRenderer({
   const [clientName, setClientName] = useState('')
   const [clientEmail, setClientEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({})
 
   const handleFieldChange = (fieldId: string, value: string) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }))
@@ -278,7 +278,7 @@ export function ClientFormRenderer({
     if (errors[fieldId]) {
       setErrors((prev) => {
         const newErrors = { ...prev }
-        delete newErrors[fieldId]
+        newErrors[fieldId] = undefined
         return newErrors
       })
     }

@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
 })
 
 type PDFField = {
+  id: string
   fieldType: string
   label: string
   required: boolean

@@ -46,7 +46,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
   }
 
   // Fetch answers with field info
-  const answers = await db
+  const answersRaw = await db
     .select({
       fieldId: formFields.id,
       fieldType: formFields.fieldType,
@@ -56,6 +56,16 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
     .from(submissionAnswers)
     .leftJoin(formFields, eq(submissionAnswers.formFieldId, formFields.id))
     .where(eq(submissionAnswers.submissionId, id))
+
+  // Filter out any answers where field info is missing (e.g., field was deleted)
+  const answers = answersRaw.filter(
+    (a) => a.fieldId !== null && a.fieldType !== null && a.label !== null,
+  ) as Array<{
+    fieldId: string
+    fieldType: string
+    label: string
+    answer: string
+  }>
 
   return (
     <div className="min-h-screen bg-gray-50">

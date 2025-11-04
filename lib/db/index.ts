@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-serverless'
+import { drizzle } from 'drizzle-orm/neon-http'
 import { formFields, formSubmissions, forms } from './schema'
 
 if (!process.env.NEON_DATABASE_URL) {

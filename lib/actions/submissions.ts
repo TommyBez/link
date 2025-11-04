@@ -82,6 +82,7 @@ export async function submitForm(data: SubmissionData) {
       clientEmail: data.clientEmail,
       submittedAt: submission.submittedAt,
       fields: fields.map((field) => ({
+        id: field.id,
         fieldType: field.fieldType,
         label: field.label,
         required: field.required,

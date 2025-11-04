@@ -76,9 +76,7 @@ export async function ensureUserInDatabase() {
     if (!existingOrg) {
       await db.insert(organizations).values({
         clerkOrgId: orgId,
-        name:
-          clerkUser.organizationMemberships?.[0]?.organization?.name ||
-          'My Studio',
+        name: 'My Studio',
       })
     }
 
