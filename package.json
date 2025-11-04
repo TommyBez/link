@@ -61,14 +61,14 @@
     "tw-animate-css": "latest"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.3",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.30.0",
-    "eslint": "^8",
-    "eslint-config-next": "16.0.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
-    "typescript": "^5"
+    "typescript": "^5",
+    "ultracite": "6.2.1"
   }
 }
