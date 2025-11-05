@@ -2,15 +2,15 @@ import { desc, eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { SubmissionsList } from '@/components/submissions/submissions-list'
-import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { getCurrentDbUser, getCurrentOrganization } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { formSubmissions, forms } from '@/lib/db/schema'
 
 export default async function SubmissionsPage() {
-  await ensureUserInDatabase()
+  const user = await getCurrentDbUser()
   const org = await getCurrentOrganization()
 
-  if (!org) {
+  if (!(user && org) || user.organizationId !== org.id) {
     redirect('/sign-in')
   }
 

@@ -14,16 +14,11 @@ export async function getCurrentUser() {
     return null
   }
 
-  // Check if user exists in our database
-  const [dbUser] = await db
-    .select()
-    .from(users)
-    .where(eq(users.clerkUserId, userId))
-    .limit(1)
+  const dbUser = await getDbUserByClerkId(userId)
 
   return {
     clerkUser,
-    dbUser: dbUser || null,
+    dbUser,
   }
 }
 
@@ -43,66 +38,30 @@ export async function getCurrentOrganization() {
   return dbOrg || null
 }
 
-export async function ensureUserInDatabase() {
-  const { userId, orgId } = await auth()
+export async function getCurrentDbUser() {
+  const { userId } = await auth()
   if (!userId) {
-    throw new Error('Not authenticated')
+    return null
   }
 
-  const clerkUser = await currentUser()
-  if (!clerkUser) {
-    throw new Error('User not found')
+  return getDbUserByClerkId(userId)
+}
+
+export async function requireCurrentDbUser() {
+  const user = await getCurrentDbUser()
+  if (!user) {
+    throw new Error('User not found in database')
   }
 
-  // Check if user exists
-  const [existingUser] = await db
+  return user
+}
+
+async function getDbUserByClerkId(clerkUserId: string) {
+  const [dbUser] = await db
     .select()
     .from(users)
-    .where(eq(users.clerkUserId, userId))
+    .where(eq(users.clerkUserId, clerkUserId))
     .limit(1)
 
-  if (existingUser) {
-    return existingUser
-  }
-
-  // Create organization if it doesn't exist
-  if (orgId) {
-    const [existingOrg] = await db
-      .select()
-      .from(organizations)
-      .where(eq(organizations.clerkOrgId, orgId))
-      .limit(1)
-
-    if (!existingOrg) {
-      await db.insert(organizations).values({
-        clerkOrgId: orgId,
-        name: 'My Studio',
-      })
-    }
-
-    // Get the organization
-    const [org] = await db
-      .select()
-      .from(organizations)
-      .where(eq(organizations.clerkOrgId, orgId))
-      .limit(1)
-
-    // Create user
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        clerkUserId: userId,
-        organizationId: org.id,
-        email: clerkUser.emailAddresses[0]?.emailAddress || '',
-        name:
-          `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() ||
-          'User',
-        role: 'staff',
-      })
-      .returning()
-
-    return newUser
-  }
-
-  throw new Error('No organization found')
+  return dbUser || null
 }

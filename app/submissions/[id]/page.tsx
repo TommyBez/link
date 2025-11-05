@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import { notFound, redirect } from 'next/navigation'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { SubmissionDetail } from '@/components/submissions/submission-detail'
-import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { getCurrentDbUser, getCurrentOrganization } from '@/lib/auth'
 import { db } from '@/lib/db'
 import {
   formFields,
@@ -16,10 +16,10 @@ type PageProps = {
 }
 
 export default async function SubmissionDetailPage({ params }: PageProps) {
-  await ensureUserInDatabase()
+  const user = await getCurrentDbUser()
   const org = await getCurrentOrganization()
 
-  if (!org) {
+  if (!(user && org) || user.organizationId !== org.id) {
     redirect('/sign-in')
   }
 

@@ -4,18 +4,16 @@ import { DashboardHeader } from '@/components/dashboard/dashboard-header'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { RecentSubmissions } from '@/components/dashboard/recent-submissions'
-import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { getCurrentDbUser, getCurrentOrganization } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { formSubmissions, forms } from '@/lib/db/schema'
 
 const RECENT_SUBMISSIONS_LIMIT = 5
 
 export default async function DashboardPage() {
-  // Ensure user is in database
-  await ensureUserInDatabase()
-
+  const user = await getCurrentDbUser()
   const org = await getCurrentOrganization()
-  if (!org) {
+  if (!(user && org) || user.organizationId !== org.id) {
     redirect('/sign-in')
   }
 

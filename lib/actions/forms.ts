@@ -3,16 +3,16 @@
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { ensureUserInDatabase, getCurrentOrganization } from '@/lib/auth'
+import { getCurrentOrganization, requireCurrentDbUser } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { formFields, forms } from '@/lib/db/schema'
 import type { FormData } from '@/lib/types/form'
 
 export async function createForm(formData: FormData) {
-  const user = await ensureUserInDatabase()
+  const user = await requireCurrentDbUser()
   const org = await getCurrentOrganization()
 
-  if (!org) {
+  if (!org || user.organizationId !== org.id) {
     throw new Error('No organization found')
   }
 
