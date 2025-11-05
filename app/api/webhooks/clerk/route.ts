@@ -1,8 +1,8 @@
 import type { WebhookEvent } from '@clerk/nextjs/server'
+import { verifyWebhook } from '@clerk/nextjs/webhooks'
 import { eq } from 'drizzle-orm'
-import { headers } from 'next/headers'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { Webhook } from 'svix'
 import { db } from '@/lib/db'
 import { organizations, users } from '@/lib/db/schema'
 
@@ -37,37 +37,11 @@ type UserPayload = {
   email_address?: string | null
 }
 
-export async function POST(req: Request) {
-  const body = await req.text()
-  const headerPayload = headers()
-
-  const svixId = headerPayload.get('svix-id')
-  const svixTimestamp = headerPayload.get('svix-timestamp')
-  const svixSignature = headerPayload.get('svix-signature')
-
-  if (!(svixId && svixTimestamp && svixSignature)) {
-    return NextResponse.json(
-      { error: 'Missing Svix signature headers' },
-      { status: 400 },
-    )
-  }
-
-  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET
-  if (!webhookSecret) {
-    return NextResponse.json(
-      { error: 'Missing Clerk webhook secret' },
-      { status: 500 },
-    )
-  }
-
+export async function POST(req: NextRequest) {
   let event: WebhookEvent
+
   try {
-    const webhook = new Webhook(webhookSecret)
-    event = webhook.verify(body, {
-      'svix-id': svixId,
-      'svix-signature': svixSignature,
-      'svix-timestamp': svixTimestamp,
-    }) as WebhookEvent
+    event = (await verifyWebhook(req)) as WebhookEvent
   } catch (_error) {
     return NextResponse.json(
       { error: 'Invalid webhook signature' },
