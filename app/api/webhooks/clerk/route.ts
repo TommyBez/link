@@ -1,41 +1,15 @@
-import type { WebhookEvent } from '@clerk/nextjs/server'
+import type {
+  OrganizationJSON,
+  OrganizationMembershipJSON,
+  UserJSON,
+  WebhookEvent,
+} from '@clerk/nextjs/server'
 import { verifyWebhook } from '@clerk/nextjs/webhooks'
 import { eq } from 'drizzle-orm'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { organizations, users } from '@/lib/db/schema'
-
-type OrganizationPayload = {
-  id: string
-  name?: string | null
-  slug?: string | null
-}
-
-type MembershipPayload = {
-  organization: OrganizationPayload
-  public_user_data?: {
-    user_id?: string | null
-    email_address?: string | null
-    first_name?: string | null
-    last_name?: string | null
-  } | null
-  role?: string | null
-  user_id?: string | null
-}
-
-type UserPayload = {
-  id: string
-  email_addresses?: Array<{
-    id: string
-    email_address: string
-  }>
-  primary_email_address_id?: string | null
-  first_name?: string | null
-  last_name?: string | null
-  username?: string | null
-  email_address?: string | null
-}
 
 export async function POST(req: NextRequest) {
   let event: WebhookEvent
@@ -69,11 +43,11 @@ async function handleEvent(event: WebhookEvent) {
   switch (event.type) {
     case 'organization.created':
     case 'organization.updated': {
-      await upsertOrganization(event.data as OrganizationPayload)
+      await upsertOrganization(event.data)
       break
     }
     case 'organization.deleted': {
-      const data = event.data as { id?: string | null }
+      const data = event.data
       if (data.id) {
         await db
           .delete(organizations)
@@ -83,12 +57,12 @@ async function handleEvent(event: WebhookEvent) {
     }
     case 'organizationMembership.created':
     case 'organizationMembership.updated': {
-      await upsertMembership(event.data as MembershipPayload)
+      await upsertMembership(event.data)
       break
     }
     case 'organizationMembership.deleted': {
-      const data = event.data as MembershipPayload
-      const userId = data.public_user_data?.user_id ?? data.user_id
+      const data = event.data
+      const userId = data.public_user_data?.user_id
       if (userId) {
         await db.delete(users).where(eq(users.clerkUserId, userId))
       }
@@ -96,12 +70,12 @@ async function handleEvent(event: WebhookEvent) {
     }
     case 'user.created':
     case 'user.updated': {
-      const data = event.data as UserPayload
+      const data = event.data
       await updateUserProfile(data)
       break
     }
     case 'user.deleted': {
-      const data = event.data as { id?: string | null }
+      const data = event.data
       if (data.id) {
         await db.delete(users).where(eq(users.clerkUserId, data.id))
       }
@@ -112,7 +86,7 @@ async function handleEvent(event: WebhookEvent) {
   }
 }
 
-async function upsertOrganization(payload: OrganizationPayload) {
+async function upsertOrganization(payload: OrganizationJSON) {
   if (!payload?.id) {
     return null
   }
@@ -137,48 +111,38 @@ async function upsertOrganization(payload: OrganizationPayload) {
   return organizationRecord?.id ?? null
 }
 
-async function upsertMembership(payload: MembershipPayload) {
+async function upsertMembership(payload: OrganizationMembershipJSON) {
   if (!payload.organization?.id) {
     return
   }
 
   const organizationId = await upsertOrganization(payload.organization)
-  const userId = payload.public_user_data?.user_id ?? payload.user_id
+  const userId = payload.public_user_data?.user_id
 
   if (!(organizationId && userId)) {
     return
   }
 
-  const email = payload.public_user_data?.email_address ?? ''
   const name = getUserDisplayName(
     payload.public_user_data?.first_name,
     payload.public_user_data?.last_name,
-    email,
   )
   const role = mapMembershipRole(payload.role)
 
-  await db
-    .insert(users)
-    .values({
-      clerkUserId: userId,
+  const [userRecord] = await db
+    .update(users)
+    .set({
       organizationId,
-      email,
       name,
       role,
     })
-    .onConflictDoUpdate({
-      target: users.clerkUserId,
-      set: {
-        organizationId,
-        email,
-        name,
-        role,
-        updatedAt: new Date(),
-      },
-    })
+    .where(eq(users.clerkUserId, userId))
+    .returning({ id: users.id })
+
+  return userRecord?.id ?? null
 }
 
-async function updateUserProfile(payload: UserPayload) {
+async function updateUserProfile(payload: UserJSON) {
   if (!payload.id) {
     return
   }
@@ -196,7 +160,7 @@ async function updateUserProfile(payload: UserPayload) {
     .where(eq(users.clerkUserId, payload.id))
 }
 
-function getPrimaryEmail(payload: UserPayload) {
+function getPrimaryEmail(payload: UserJSON) {
   if (payload.primary_email_address_id && payload.email_addresses) {
     const primary = payload.email_addresses.find(
       (email) => email.id === payload.primary_email_address_id,
@@ -210,14 +174,10 @@ function getPrimaryEmail(payload: UserPayload) {
     return payload.email_addresses[0]?.email_address ?? ''
   }
 
-  if (payload.email_address) {
-    return payload.email_address
-  }
-
   return ''
 }
 
-function getOrganizationName(payload: OrganizationPayload) {
+function getOrganizationName(payload: OrganizationJSON) {
   return payload.name?.trim() || payload.slug?.trim() || 'Untitled organization'
 }
 
