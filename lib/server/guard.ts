@@ -55,9 +55,6 @@ export async function requireStaff(): Promise<AuthContext> {
   // Look up membership and role
   const membership = await db.query.memberships.findFirst({
     where: (m, { and }) => and(eq(m.userId, user.id), eq(m.orgId, org.id)),
-    with: {
-      org: true,
-    },
   })
 
   if (!membership) {
