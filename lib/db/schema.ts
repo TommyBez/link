@@ -3,6 +3,7 @@ import {
   index,
   integer,
   jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -10,6 +11,10 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
+
+export const roles = pgEnum('roles', ['ADMIN', 'STAFF'] as const)
+
+export type Role = (typeof roles.enumValues)[number]
 
 // Organizations table
 export const orgs = pgTable(
@@ -54,7 +59,7 @@ export const memberships = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: varchar('role', { length: 50 }).notNull(), // 'ADMIN' | 'STAFF'
+    role: roles('role').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

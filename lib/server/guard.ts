@@ -1,8 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { db } from '../db'
-import { orgs, users } from '../db/schema'
-import type { Role } from '../rbac'
+import { orgs, type Role, users } from '../db/schema'
 import { isStaff } from '../rbac'
 
 export type AuthContext = {
@@ -65,9 +64,9 @@ export async function requireStaff(): Promise<AuthContext> {
     throw new Error('Forbidden: No membership found for organization')
   }
 
-  const roles: Role[] = [membership.role as Role]
+  const userRoles: Role[] = [membership.role]
 
-  if (!isStaff(roles)) {
+  if (!isStaff(userRoles)) {
     throw new Error('Forbidden: STAFF or ADMIN role required')
   }
 
@@ -75,6 +74,6 @@ export async function requireStaff(): Promise<AuthContext> {
     userId: user.id,
     clerkUserId,
     orgId: membership.orgId,
-    roles,
+    roles: userRoles,
   }
 }

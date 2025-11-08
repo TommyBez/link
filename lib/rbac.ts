@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'STAFF'
+import type { Role } from './db/schema'
 
 export type RequestContext = {
   userId: string
