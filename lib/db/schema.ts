@@ -22,9 +22,7 @@ export const orgs = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    clerkOrgIdIdx: index('orgs_clerk_org_id_idx').on(table.clerkOrgId),
-  }),
+  (table) => [index('orgs_clerk_org_id_idx').on(table.clerkOrgId)],
 )
 
 // Users table
@@ -39,10 +37,10 @@ export const users = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    clerkUserIdIdx: index('users_clerk_user_id_idx').on(table.clerkUserId),
-    emailIdx: index('users_email_idx').on(table.email),
-  }),
+  (table) => [
+    index('users_clerk_user_id_idx').on(table.clerkUserId),
+    index('users_email_idx').on(table.email),
+  ],
 )
 
 // Memberships table (role-based access)
@@ -61,14 +59,11 @@ export const memberships = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    orgUserUnique: uniqueIndex('memberships_org_user_unique').on(
-      table.orgId,
-      table.userId,
-    ),
-    orgIdIdx: index('memberships_org_id_idx').on(table.orgId),
-    userIdIdx: index('memberships_user_id_idx').on(table.userId),
-  }),
+  (table) => [
+    uniqueIndex('memberships_org_user_unique').on(table.orgId, table.userId),
+    index('memberships_org_id_idx').on(table.orgId),
+    index('memberships_user_id_idx').on(table.userId),
+  ],
 )
 
 // Templates table
@@ -88,10 +83,10 @@ export const templates = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    orgIdIdx: index('templates_org_id_idx').on(table.orgId),
-    statusIdx: index('templates_status_idx').on(table.status),
-  }),
+  (table) => [
+    index('templates_org_id_idx').on(table.orgId),
+    index('templates_status_idx').on(table.status),
+  ],
 )
 
 // Template versions table (immutable after publish)
@@ -109,14 +104,13 @@ export const templateVersions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    templateVersionUnique: uniqueIndex(
-      'template_versions_template_version_unique',
-    ).on(table.templateId, table.version),
-    templateIdIdx: index('template_versions_template_id_idx').on(
+  (table) => [
+    uniqueIndex('template_versions_template_version_unique').on(
       table.templateId,
+      table.version,
     ),
-  }),
+    index('template_versions_template_id_idx').on(table.templateId),
+  ],
 )
 
 // Intake sessions table (tokenized links with TTL)
@@ -137,11 +131,11 @@ export const intakeSessions = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    tokenIdx: uniqueIndex('intake_sessions_token_idx').on(table.token),
-    orgIdIdx: index('intake_sessions_org_id_idx').on(table.orgId),
-    statusIdx: index('intake_sessions_status_idx').on(table.status),
-  }),
+  (table) => [
+    uniqueIndex('intake_sessions_token_idx').on(table.token),
+    index('intake_sessions_org_id_idx').on(table.orgId),
+    index('intake_sessions_status_idx').on(table.status),
+  ],
 )
 
 // Submissions table
@@ -168,16 +162,12 @@ export const submissions = pgTable(
       .notNull(),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
   },
-  (table) => ({
-    intakeSessionIdIdx: index('submissions_intake_session_id_idx').on(
-      table.intakeSessionId,
-    ),
-    orgIdIdx: index('submissions_org_id_idx').on(table.orgId),
-    statusIdx: index('submissions_status_idx').on(table.status),
-    respondentEmailIdx: index('submissions_respondent_email_idx').on(
-      table.respondentEmail,
-    ),
-  }),
+  (table) => [
+    index('submissions_intake_session_id_idx').on(table.intakeSessionId),
+    index('submissions_org_id_idx').on(table.orgId),
+    index('submissions_status_idx').on(table.status),
+    index('submissions_respondent_email_idx').on(table.respondentEmail),
+  ],
 )
 
 // Signatures table
@@ -198,11 +188,9 @@ export const signatures = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    submissionIdIdx: uniqueIndex('signatures_submission_id_idx').on(
-      table.submissionId,
-    ),
-  }),
+  (table) => [
+    uniqueIndex('signatures_submission_id_idx').on(table.submissionId),
+  ],
 )
 
 // PDF artifacts table
@@ -226,12 +214,10 @@ export const pdfArtifacts = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    submissionIdIdx: uniqueIndex('pdf_artifacts_submission_id_idx').on(
-      table.submissionId,
-    ),
-    statusIdx: index('pdf_artifacts_status_idx').on(table.status),
-  }),
+  (table) => [
+    uniqueIndex('pdf_artifacts_submission_id_idx').on(table.submissionId),
+    index('pdf_artifacts_status_idx').on(table.status),
+  ],
 )
 
 // Relations
