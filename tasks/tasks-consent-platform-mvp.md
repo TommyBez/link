@@ -56,14 +56,14 @@ IMPORTANT: As you complete each task, you must check it off in this markdown fil
 
 ## Tasks
 
-- [ ] 1.0 Platform foundations (DB schema, storage, env, RBAC scaffolding)
-  - [ ] 1.1 Configure Drizzle (`drizzle.config.ts`), install ORM/driver, and create `lib/db/index.ts`
-  - [ ] 1.2 Implement core entities in `lib/db/schema.ts` (Org, User, Membership, Template, TemplateVersion, IntakeSession, Submission, Signature, PdfArtifact, Invite, OtpCode)
-  - [ ] 1.3 Generate initial migrations and apply to the database
-  - [ ] 1.4 Implement Vercel Blob client in `lib/storage/blob.ts` for signatures and PDFs
-  - [ ] 1.5 Create `lib/rbac.ts` with helpers for Admin/Staff checks and org scoping
-  - [ ] 1.6 Create `lib/crypto.ts` with `hashPayloadSHA256(json: unknown): string`
-  - [ ] 1.7 Add `proxy.ts` to protect `(staff)` routes
+- [x] 1.0 Platform foundations (DB schema, storage, env, RBAC scaffolding)
+  - [x] 1.1 Configure Drizzle (`drizzle.config.ts`), install ORM/driver, and create `lib/db/index.ts`
+  - [x] 1.2 Implement core entities in `lib/db/schema.ts` (Org, User, Membership, Template, TemplateVersion, IntakeSession, Submission, Signature, PdfArtifact) - Note: Invites/OTP removed (Clerk handles auth)
+  - [x] 1.3 Generate initial migrations and apply to the database (scripts added: `pnpm db:generate`, `pnpm db:push`)
+  - [x] 1.4 Implement Vercel Blob client in `lib/storage/blob.ts` for signatures and PDFs
+  - [x] 1.5 Create `lib/rbac.ts` with helpers for Admin/Staff checks and org scoping
+  - [x] 1.6 Create `lib/crypto.ts` with `hashPayloadSHA256(json: unknown): string`
+  - [x] 1.7 Add `middleware.ts` with Clerk protection, update `app/layout.tsx` with ClerkProvider, create `lib/server/guard.ts` for RBAC
 - [ ] 2.0 Auth & Organization onboarding (email OTP, org creation, invites)
   - [ ] 2.1 Build email OTP UI at `app/(auth)/sign-in/page.tsx` (request + verify steps)
   - [ ] 2.2 Implement `POST /api/auth/otp/request` to create OTP code (hashed, TTL) and send email
