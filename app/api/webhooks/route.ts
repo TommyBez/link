@@ -37,11 +37,20 @@ async function handleUserCreated(evt: WebhookEvent) {
     throw new Error(`User created without email: ${id}`)
   }
 
-  await db.insert(users).values({
-    clerkUserId: id,
-    email,
-    name,
-  })
+  await db
+    .insert(users)
+    .values({
+      clerkUserId: id,
+      email,
+      name,
+    })
+    .onConflictDoUpdate({
+      target: users.clerkUserId,
+      set: {
+        email,
+        name,
+      },
+    })
 
   console.log(`User created: ${id} (${email})`)
 }
@@ -92,10 +101,18 @@ async function handleOrganizationCreated(evt: WebhookEvent) {
 
   const { id, name } = evt.data
 
-  await db.insert(orgs).values({
-    clerkOrgId: id,
-    name: name || 'Unnamed Organization',
-  })
+  await db
+    .insert(orgs)
+    .values({
+      clerkOrgId: id,
+      name: name || 'Unnamed Organization',
+    })
+    .onConflictDoUpdate({
+      target: orgs.clerkOrgId,
+      set: {
+        name: name || 'Unnamed Organization',
+      },
+    })
 
   console.log(`Organization created: ${id} (${name})`)
 }
@@ -166,11 +183,16 @@ async function handleMembershipCreated(evt: WebhookEvent) {
 
   const mappedRole = role === 'org:admin' ? 'ADMIN' : 'STAFF'
 
-  await db.insert(memberships).values({
-    orgId: org.id,
-    userId: user.id,
-    role: mappedRole,
-  })
+  await db
+    .insert(memberships)
+    .values({
+      orgId: org.id,
+      userId: user.id,
+      role: mappedRole,
+    })
+    .onConflictDoNothing({
+      target: [memberships.orgId, memberships.userId],
+    })
 
   console.log(
     `Membership created: user ${userId} -> org ${orgId} (${mappedRole})`,
