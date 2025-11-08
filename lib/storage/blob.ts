@@ -6,7 +6,8 @@ export function putSignature(
   file: Blob | Buffer,
   contentType: string,
 ) {
-  return put(`signatures/${name}`, file as Blob, {
+  const blob = file instanceof Blob ? file : new Blob([file])
+  return put(`signatures/${name}`, blob, {
     access: 'public',
     token: env.BLOB_READ_WRITE_TOKEN,
     contentType,
@@ -15,7 +16,7 @@ export function putSignature(
 }
 
 export function putPdf(name: string, file: Buffer) {
-  return put(`pdfs/${name}`, file as unknown as Blob, {
+  return put(`pdfs/${name}`, new Blob([file]), {
     access: 'public',
     token: env.BLOB_READ_WRITE_TOKEN,
     contentType: 'application/pdf',

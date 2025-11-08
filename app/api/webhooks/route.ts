@@ -28,7 +28,6 @@ async function handleUserCreated(evt: WebhookEvent) {
   if (evt.type !== 'user.created') {
     return
   }
-
   const { id, email_addresses, first_name, last_name } = evt.data
   const email = getPrimaryEmail(email_addresses)
   const name = getUserName(first_name, last_name)
@@ -59,7 +58,6 @@ async function handleUserUpdated(evt: WebhookEvent) {
   if (evt.type !== 'user.updated') {
     return
   }
-
   const { id, email_addresses, first_name, last_name } = evt.data
   const email = getPrimaryEmail(email_addresses)
   const name = getUserName(first_name, last_name)
@@ -83,12 +81,10 @@ async function handleUserDeleted(evt: WebhookEvent) {
   if (evt.type !== 'user.deleted') {
     return
   }
-
   const { id } = evt.data
   if (!id) {
-    throw new Error('User deleted event missing id')
+    return
   }
-
   await db.delete(users).where(eq(users.clerkUserId, id))
 
   console.log(`User deleted: ${id}`)
@@ -98,7 +94,6 @@ async function handleOrganizationCreated(evt: WebhookEvent) {
   if (evt.type !== 'organization.created') {
     return
   }
-
   const { id, name } = evt.data
 
   await db
@@ -121,7 +116,6 @@ async function handleOrganizationUpdated(evt: WebhookEvent) {
   if (evt.type !== 'organization.updated') {
     return
   }
-
   const { id, name } = evt.data
 
   await db
@@ -138,12 +132,10 @@ async function handleOrganizationDeleted(evt: WebhookEvent) {
   if (evt.type !== 'organization.deleted') {
     return
   }
-
   const { id } = evt.data
   if (!id) {
-    throw new Error('Organization deleted event missing id')
+    return
   }
-
   await db.delete(orgs).where(eq(orgs.clerkOrgId, id))
 
   console.log(`Organization deleted: ${id}`)
@@ -153,7 +145,6 @@ async function handleMembershipCreated(evt: WebhookEvent) {
   if (evt.type !== 'organizationMembership.created') {
     return
   }
-
   const { organization, public_user_data, role } = evt.data
   const orgId = organization.id
   const userId = public_user_data.user_id
@@ -203,7 +194,6 @@ async function handleMembershipUpdated(evt: WebhookEvent) {
   if (evt.type !== 'organizationMembership.updated') {
     return
   }
-
   const { organization, public_user_data, role } = evt.data
   const orgId = organization.id
   const userId = public_user_data.user_id
@@ -249,7 +239,6 @@ async function handleMembershipDeleted(evt: WebhookEvent) {
   if (evt.type !== 'organizationMembership.deleted') {
     return
   }
-
   const { organization, public_user_data } = evt.data
   const orgId = organization.id
   const userId = public_user_data.user_id
@@ -321,12 +310,10 @@ async function handleWebhookEvent(evt: WebhookEvent) {
 export async function POST(req: NextRequest) {
   try {
     const evt = await verifyWebhook(req)
-
     await handleWebhookEvent(evt)
-
     return new Response('Webhook received', { status: 200 })
   } catch (err) {
-    console.error('Error verifying webhook:', err)
-    return new Response('Error verifying webhook', { status: 400 })
+    console.error('Webhook error:', err)
+    return new Response('Webhook processing failed', { status: 400 })
   }
 }

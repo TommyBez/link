@@ -34,7 +34,6 @@ export async function requireStaff(): Promise<AuthContext> {
     throw new Error('Forbidden: No organization context')
   }
 
-  // Look up user in our database
   const user = await db.query.users.findFirst({
     where: eq(users.clerkUserId, clerkUserId),
   })
@@ -43,7 +42,6 @@ export async function requireStaff(): Promise<AuthContext> {
     throw new Error('Forbidden: User not found in database')
   }
 
-  // Look up org by Clerk org ID
   const org = await db.query.orgs.findFirst({
     where: eq(orgs.clerkOrgId, clerkOrgId),
   })
@@ -52,7 +50,6 @@ export async function requireStaff(): Promise<AuthContext> {
     throw new Error('Forbidden: Organization not found')
   }
 
-  // Look up membership and role
   const membership = await db.query.memberships.findFirst({
     where: (m, { and }) => and(eq(m.userId, user.id), eq(m.orgId, org.id)),
   })
