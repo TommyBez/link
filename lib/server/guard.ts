@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { db } from '../db'
-import { users } from '../db/schema'
+import { orgs, users } from '../db/schema'
 import type { Role } from '../rbac'
 import { isStaff } from '../rbac'
 
@@ -44,9 +44,18 @@ export async function requireStaff(): Promise<AuthContext> {
     throw new Error('Forbidden: User not found in database')
   }
 
+  // Look up org by Clerk org ID
+  const org = await db.query.orgs.findFirst({
+    where: eq(orgs.clerkOrgId, clerkOrgId),
+  })
+
+  if (!org) {
+    throw new Error('Forbidden: Organization not found')
+  }
+
   // Look up membership and role
   const membership = await db.query.memberships.findFirst({
-    where: (m, { and }) => and(eq(m.userId, user.id), eq(m.orgId, clerkOrgId)),
+    where: (m, { and }) => and(eq(m.userId, user.id), eq(m.orgId, org.id)),
     with: {
       org: true,
     },
