@@ -9,6 +9,7 @@ import {
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+import { itIT } from '@clerk/localizations'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={itIT}>
       <html lang="en">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -48,7 +49,7 @@ export default function RootLayout({
                   </SignInButton>
                   <SignUpButton mode="modal">
                     <button
-                      className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                      className="rounded bg-primary px-4 py-2 text-primary-foreground text-sm hover:opacity-90"
                       type="button"
                     >
                       Sign up

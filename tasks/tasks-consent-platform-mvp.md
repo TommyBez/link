@@ -64,12 +64,15 @@ IMPORTANT: As you complete each task, you must check it off in this markdown fil
   - [x] 1.5 Create `lib/rbac.ts` with helpers for Admin/Staff checks and org scoping
   - [x] 1.6 Create `lib/crypto.ts` with `hashPayloadSHA256(json: unknown): string`
   - [x] 1.7 Add `middleware.ts` with Clerk protection, update `app/layout.tsx` with ClerkProvider, create `lib/server/guard.ts` for RBAC
-- [ ] 2.0 Auth & Organization onboarding (email OTP, org creation, invites)
-  - [ ] 2.1 Build email OTP UI at `app/(auth)/sign-in/page.tsx` (request + verify steps)
-  - [ ] 2.2 Implement `POST /api/auth/otp/request` to create OTP code (hashed, TTL) and send email
-  - [ ] 2.3 Implement `POST /api/auth/otp/verify` to validate code, create user/org on first login, and start session
-  - [ ] 2.4 Implement invites: `POST /api/invites` (Admin) and `POST /api/invites/accept` to join org
-  - [ ] 2.5 Add users management UI at `app/(staff)/settings/users/page.tsx` (invite, list, role)
+- [x] 2.0 Auth & Organization onboarding (Clerk: sign-in, invited vs self-serve studio setup)
+  - [x] 2.1 Add Clerk sign-in page at `app/sign-in/[[...sign-in]]/page.tsx` using `<SignIn />` (email code/magic link)
+  - [x] 2.2 Add Clerk sign-up page at `app/sign-up/[[...sign-up]]/page.tsx` using `<SignUp />`
+  - [x] 2.3 Update `proxy.ts` to make `/sign-in` and `/sign-up` routes public
+  - [x] 2.4 On session: If Clerk org/membership exists, proceed. If none, redirect to onboarding. Do not create local org/membership here (webhooks handle sync).
+  - [x] 2.5 Build onboarding flow at `app/(onboarding)/studio/new/page.tsx` to create the studio via Clerk Organizations and set current user as admin; local `Org`/`Membership` are synced by webhooks (fields: studio name, locale/timezone; optional address/phone)
+  - [x] 2.6 Add guard/redirect: authenticated users without a Clerk membership are forced to onboarding until the studio is created; invited members skip onboarding
+  - [x] 2.7 Add users management UI at `app/(staff)/settings/users/page.tsx` using Clerk (list members, invite, roles)
+  - [x] 2.8 Handle Clerk webhooks in `app/api/webhooks/route.ts` to sync user/org/membership changes (organization/membership created/updated/deleted, invitation accepted)
 - [ ] 3.0 Consent Templates & Builder with publish/versioning
   - [ ] 3.1 Define template JSON schema/types in `lib/templates/schema.ts` (fields, required, helper text, branding)
   - [ ] 3.2 Create builder UI at `app/(staff)/templates/new/page.tsx` supporting required MVP field types
