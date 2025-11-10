@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
 import { hashPayloadSHA256 } from '@/lib/crypto'
 import { db } from '@/lib/db'
@@ -100,10 +100,25 @@ export async function POST(request: NextRequest) {
         },
       })
 
+    // Fetch the latest published version (if any) to return in response
+    const latestPublished = await db
+      .select({ version: templateVersions.version })
+      .from(templateVersions)
+      .where(
+        and(
+          eq(templateVersions.templateId, templateId),
+          gt(templateVersions.version, 0),
+        ),
+      )
+      .orderBy(desc(templateVersions.version))
+      .limit(1)
+      .then((rows) => rows[0] ?? null)
+
     return NextResponse.json(
       {
         id: templateId,
         status: 'draft' as TemplateStatus,
+        ...(latestPublished && { version: latestPublished.version }),
       },
       { status: body.templateId ? 200 : 201 },
     )
