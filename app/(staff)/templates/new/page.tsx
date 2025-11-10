@@ -221,7 +221,7 @@ export default function NewTemplateBuilderPage() {
     setTemplateMeta(null)
     setTemplateName('')
     setDescription('')
-    setLocale('en-US')
+    setLocale('it-IT')
     setFields([])
     setBranding({ ...DEFAULT_BRANDING })
     toast.info('Builder reset. Start fresh!')
