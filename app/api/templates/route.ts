@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!body?.template) {
       return NextResponse.json(
-        { error: 'Missing template payload.' },
+        { error: 'Payload template mancante.' },
         { status: 400 },
       )
     }
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         {
-          error: 'Invalid template payload.',
+          error: 'Payload template non valido.',
           details: parsed.error.issues,
         },
         { status: 422 },
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
       if (!existing) {
         return NextResponse.json(
-          { error: 'Template not found.' },
+          { error: 'Template non trovato.' },
           { status: 404 },
         )
       }
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error(error)
     return NextResponse.json(
-      { error: 'Unable to save template draft.' },
+      { error: 'Impossibile salvare la bozza del template.' },
       { status: 500 },
     )
   }
@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error(error)
     return NextResponse.json(
-      { error: 'Unable to fetch templates.' },
+      { error: 'Impossibile recuperare i template.' },
       { status: 500 },
     )
   }

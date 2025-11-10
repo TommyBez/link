@@ -130,7 +130,7 @@ export default function NewTemplateBuilderPage() {
   const handleSaveDraft = useCallback(() => {
     const parsed = templateDraft.safeParse(draftPayload)
     if (!parsed.success) {
-      toast.error('Please resolve validation errors before saving.')
+      toast.error('Risolvi gli errori di validazione prima di salvare.')
       return
     }
 
@@ -160,23 +160,23 @@ export default function NewTemplateBuilderPage() {
           version: body.version,
         })
 
-        toast.success('Template draft saved.')
+        toast.success('Bozza template salvata.')
       } catch (error) {
         console.error(error)
-        toast.error('Failed to save draft. Please try again.')
+        toast.error('Impossibile salvare la bozza. Riprova.')
       }
     })
   }, [draftPayload, templateMeta?.id])
 
   const handlePublish = useCallback(() => {
     if (!templateMeta?.id) {
-      toast.info('Save your draft first before publishing.')
+      toast.info('Salva prima la bozza prima di pubblicare.')
       return
     }
 
     const parsed = templateDraft.safeParse(draftPayload)
     if (!parsed.success) {
-      toast.error('Resolve validation errors before publishing.')
+      toast.error('Risolvi gli errori di validazione prima di pubblicare.')
       return
     }
 
@@ -209,10 +209,10 @@ export default function NewTemplateBuilderPage() {
             : { id: templateMeta.id, version: body.version },
         )
 
-        toast.success(`Template published (v${body.version}).`)
+        toast.success(`Template pubblicato (v${body.version}).`)
       } catch (error) {
         console.error(error)
-        toast.error('Failed to publish template. Please try again.')
+        toast.error('Impossibile pubblicare il template. Riprova.')
       }
     })
   }, [draftPayload, templateMeta])
@@ -224,23 +224,23 @@ export default function NewTemplateBuilderPage() {
     setLocale('it-IT')
     setFields([])
     setBranding({ ...DEFAULT_BRANDING })
-    toast.info('Builder reset. Start fresh!')
+    toast.info('Builder reimpostato. Ricomincia da capo!')
   }, [])
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 pb-16">
       <div className="mb-10 space-y-3">
         <div>
-          <h1 className="font-semibold text-3xl">New consent template</h1>
+          <h1 className="font-semibold text-3xl">Nuovo template di consenso</h1>
           <p className="text-muted-foreground">
-            Compose fields, collect signatures, and publish a reusable template
-            for intakes.
+            Componi campi, raccogli firme e pubblica un template riutilizzabile
+            per le raccolte dati.
           </p>
         </div>
 
         {templateMeta?.version ? (
           <div className="text-muted-foreground text-sm">
-            Latest published version: v{templateMeta.version}
+            Ultima versione pubblicata: v{templateMeta.version}
           </div>
         ) : null}
       </div>

@@ -55,19 +55,19 @@ export function TemplateStatusSidebar({
     <aside className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Status & actions</CardTitle>
+          <CardTitle>Stato e azioni</CardTitle>
           <CardDescription>
-            Save drafts while iterating. Publish when you&apos;re ready to use
-            this template.
+            Salva le bozze durante l&apos;iterazione. Pubblica quando sei pronto
+            per utilizzare questo template.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border bg-muted/50 px-4 py-3 text-sm leading-relaxed">
-            <p className="font-medium text-muted-foreground">Validation</p>
+            <p className="font-medium text-muted-foreground">Validazione</p>
             {validation.success ? (
               <p className="mt-2 flex items-center gap-2 text-emerald-600">
                 <CheckCircle2Icon className="size-4" />
-                Looks good! Ready to save or publish.
+                Tutto a posto! Pronto per salvare o pubblicare.
               </p>
             ) : (
               <ul className="mt-2 list-disc space-y-1 pl-5 text-amber-600">
@@ -77,20 +77,20 @@ export function TemplateStatusSidebar({
                   </li>
                 ))}
                 {validation.error.issues.length > 4 ? (
-                  <li>+{validation.error.issues.length - 4} more</li>
+                  <li>+{validation.error.issues.length - 4} altri</li>
                 ) : null}
               </ul>
             )}
           </div>
 
           <div className="space-y-2 text-sm">
-            <p className="font-medium text-muted-foreground">Template info</p>
+            <p className="font-medium text-muted-foreground">Info template</p>
             <div className="grid gap-1 rounded-lg border bg-muted/50 px-4 py-3 text-muted-foreground">
-              <span>Name: {templateName || '—'}</span>
-              <span>Fields: {fields.length}</span>
-              <span>Locale: {locale}</span>
+              <span>Nome: {templateName || '—'}</span>
+              <span>Campi: {fields.length}</span>
+              <span>Localizzazione: {locale}</span>
               <span>
-                Last version:{' '}
+                Ultima versione:{' '}
                 {templateMeta?.version ? `v${templateMeta.version}` : '—'}
               </span>
             </div>
@@ -107,7 +107,7 @@ export function TemplateStatusSidebar({
               ) : (
                 <SaveIcon className="mr-2 size-4" />
               )}
-              Save draft
+              Salva bozza
             </Button>
             <Button
               disabled={isPending || hasErrors || fields.length === 0}
@@ -120,7 +120,7 @@ export function TemplateStatusSidebar({
               ) : (
                 <SparklesIcon className="mr-2 size-4" />
               )}
-              Publish template
+              Pubblica template
             </Button>
             <Button
               disabled={
@@ -131,14 +131,14 @@ export function TemplateStatusSidebar({
               variant="ghost"
             >
               <ArchiveRestoreIcon className="mr-2 size-4" />
-              Reset builder
+              Reimposta builder
             </Button>
           </div>
 
           {fieldErrorCount > 0 ? (
             <p className="text-amber-600 text-sm">
-              {fieldErrorCount} field validation{' '}
-              {fieldErrorCount === 1 ? 'issue' : 'issues'} to review.
+              {fieldErrorCount} problema di validazione{' '}
+              {fieldErrorCount === 1 ? 'del campo' : 'dei campi'} da rivedere.
             </p>
           ) : null}
         </CardContent>
@@ -146,9 +146,9 @@ export function TemplateStatusSidebar({
 
       <Card>
         <CardHeader>
-          <CardTitle>Live schema preview</CardTitle>
+          <CardTitle>Anteprima schema live</CardTitle>
           <CardDescription>
-            Validated payload that the API will receive.
+            Payload validato che l&apos;API riceverà.
           </CardDescription>
         </CardHeader>
         <CardContent>

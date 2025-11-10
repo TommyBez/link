@@ -21,7 +21,7 @@ export async function POST(
 
     if (!body?.template) {
       return NextResponse.json(
-        { error: 'Missing template payload.' },
+        { error: 'Payload template mancante.' },
         { status: 400 },
       )
     }
@@ -30,7 +30,7 @@ export async function POST(
     if (!parsed.success) {
       return NextResponse.json(
         {
-          error: 'Invalid template payload.',
+          error: 'Payload template non valido.',
           details: parsed.error.issues,
         },
         { status: 422 },
@@ -44,7 +44,7 @@ export async function POST(
 
     if (!templateRow) {
       return NextResponse.json(
-        { error: 'Template not found.' },
+        { error: 'Template non trovato.' },
         { status: 404 },
       )
     }
@@ -106,7 +106,7 @@ export async function POST(
   } catch (error) {
     console.error(error)
     return NextResponse.json(
-      { error: 'Unable to publish template.' },
+      { error: 'Impossibile pubblicare il template.' },
       { status: 500 },
     )
   }

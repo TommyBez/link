@@ -38,14 +38,14 @@ function EmptyState({ addField }: { addField: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed bg-muted/40 py-12 text-center">
       <div className="space-y-1">
-        <p className="font-medium text-lg">No fields yet</p>
+        <p className="font-medium text-lg">Nessun campo ancora</p>
         <p className="text-muted-foreground text-sm">
-          Start by adding a field type from the builder palette.
+          Inizia aggiungendo un tipo di campo dalla palette del builder.
         </p>
       </div>
       <Button onClick={addField} type="button">
         <PlusIcon className="mr-2 size-4" />
-        Add first field
+        Aggiungi primo campo
       </Button>
     </div>
   )
@@ -62,10 +62,10 @@ export function FormFieldsSection({
   return (
     <Card>
       <CardHeader className="overflow-hidden">
-        <CardTitle>Form fields</CardTitle>
+        <CardTitle>Campi del modulo</CardTitle>
         <CardDescription>
-          Drag to reorder fields. Configure labels, requirements, and helper
-          text.
+          Trascina per riordinare i campi. Configura etichette, requisiti e testo
+          di aiuto.
         </CardDescription>
         <CardAction className="w-fit min-w-0 max-w-full">
           <div className="flex flex-wrap items-center gap-2">
@@ -93,7 +93,7 @@ export function FormFieldsSection({
               }}
             >
               <SelectTrigger className="w-[180px] sm:hidden">
-                <SelectValue placeholder="Add field" />
+                <SelectValue placeholder="Aggiungi campo" />
               </SelectTrigger>
               <SelectContent>
                 {INITIAL_CATALOG.map((item) => (

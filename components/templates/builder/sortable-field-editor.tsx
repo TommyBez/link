@@ -29,7 +29,7 @@ function FieldCommonControls({ field, updateField }: FieldControlsProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor={`${field.id}-label`}>Label</Label>
+        <Label htmlFor={`${field.id}-label`}>Etichetta</Label>
         <Input
           id={`${field.id}-label`}
           onChange={(event) =>
@@ -40,7 +40,7 @@ function FieldCommonControls({ field, updateField }: FieldControlsProps) {
       </div>
       {field.type !== 'content' ? (
         <div className="space-y-2">
-          <Label htmlFor={`${field.id}-helper`}>Helper text</Label>
+          <Label htmlFor={`${field.id}-helper`}>Testo di aiuto</Label>
           <Textarea
             id={`${field.id}-helper`}
             onChange={(event) =>
@@ -56,7 +56,7 @@ function FieldCommonControls({ field, updateField }: FieldControlsProps) {
         field.type === 'email' ||
         field.type === 'phone') && (
         <div className="space-y-2">
-          <Label htmlFor={`${field.id}-placeholder`}>Placeholder text</Label>
+          <Label htmlFor={`${field.id}-placeholder`}>Testo segnaposto</Label>
           <Input
             id={`${field.id}-placeholder`}
             onChange={(event) =>
@@ -79,7 +79,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
       return (
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor={`${field.id}-maxlength`}>Max length</Label>
+            <Label htmlFor={`${field.id}-maxlength`}>Lunghezza massima</Label>
             <Input
               id={`${field.id}-maxlength`}
               min={1}
@@ -91,7 +91,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
                     : undefined,
                 })
               }
-              placeholder="Optional"
+              placeholder="Opzionale"
               type="number"
               value={field.maxLength ?? ''}
             />
@@ -102,7 +102,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
       return (
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor={`${field.id}-maxlength`}>Max length</Label>
+            <Label htmlFor={`${field.id}-maxlength`}>Lunghezza massima</Label>
             <Input
               id={`${field.id}-maxlength`}
               min={1}
@@ -114,7 +114,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
                     : undefined,
                 })
               }
-              placeholder="Optional"
+              placeholder="Opzionale"
               type="number"
               value={field.maxLength ?? ''}
             />
@@ -124,13 +124,13 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
     case 'phone':
       return (
         <div className="space-y-2">
-          <Label htmlFor={`${field.id}-pattern`}>Validation pattern</Label>
+          <Label htmlFor={`${field.id}-pattern`}>Pattern di validazione</Label>
           <Input
             id={`${field.id}-pattern`}
             onChange={(event) =>
               updateField({ ...field, pattern: event.target.value })
             }
-            placeholder="E.g. ^\\+?[0-9()\\s-]+$"
+            placeholder="Es. ^\\+?[0-9()\\s-]+$"
             value={field.pattern ?? ''}
           />
         </div>
@@ -139,7 +139,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
       return (
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor={`${field.id}-min`}>Earliest date</Label>
+            <Label htmlFor={`${field.id}-min`}>Data più antica</Label>
             <Input
               id={`${field.id}-min`}
               onChange={(event) =>
@@ -150,7 +150,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`${field.id}-max`}>Latest date</Label>
+            <Label htmlFor={`${field.id}-max`}>Data più recente</Label>
             <Input
               id={`${field.id}-max`}
               onChange={(event) =>
@@ -179,7 +179,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
             className="text-muted-foreground text-sm"
             htmlFor={`${field.id}-default`}
           >
-            Checked by default
+            Selezionato di default
           </Label>
         </div>
       )
@@ -188,7 +188,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
     case 'signature':
       return (
         <div className="space-y-2">
-          <Label htmlFor={`${field.id}-ack`}>Acknowledgement text</Label>
+          <Label htmlFor={`${field.id}-ack`}>Testo di riconoscimento</Label>
           <Textarea
             id={`${field.id}-ack`}
             onChange={(event) =>
@@ -203,7 +203,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
       return (
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor={`${field.id}-content`}>Content</Label>
+            <Label htmlFor={`${field.id}-content`}>Contenuto</Label>
             <Textarea
               id={`${field.id}-content`}
               onChange={(event) =>
@@ -214,7 +214,7 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`${field.id}-align`}>Alignment</Label>
+            <Label htmlFor={`${field.id}-align`}>Allineamento</Label>
             <Select
               onValueChange={(value) =>
                 updateField({
@@ -225,12 +225,12 @@ function TypeSpecificControls({ field, updateField }: FieldControlsProps) {
               value={field.align ?? 'start'}
             >
               <SelectTrigger className="w-40" id={`${field.id}-align`}>
-                <SelectValue placeholder="Select alignment" />
+                <SelectValue placeholder="Seleziona allineamento" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="start">Left</SelectItem>
-                <SelectItem value="center">Center</SelectItem>
-                <SelectItem value="end">Right</SelectItem>
+                <SelectItem value="start">Sinistra</SelectItem>
+                <SelectItem value="center">Centro</SelectItem>
+                <SelectItem value="end">Destra</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -255,7 +255,7 @@ function RadioOptionsEditor({
         ...field.options,
         {
           id: crypto.randomUUID(),
-          label: `Option ${String.fromCharCode(65 + field.options.length)}`,
+          label: `Opzione ${String.fromCharCode(65 + field.options.length)}`,
         },
       ],
     })
@@ -270,7 +270,7 @@ function RadioOptionsEditor({
 
   const removeOption = (index: number) => {
     if (field.options.length <= 2) {
-      toast.error('Radio fields require at least two options.')
+      toast.error('I campi radio richiedono almeno due opzioni.')
       return
     }
     const options = field.options.filter((_, idx) => idx !== index)
@@ -280,7 +280,7 @@ function RadioOptionsEditor({
   return (
     <div className="space-y-3">
       <div className="space-y-2">
-        <Label>Options</Label>
+        <Label>Opzioni</Label>
         <div className="space-y-2">
           {field.options.map((option, index) => (
             <div className="flex items-center gap-2" key={option.id}>
@@ -288,7 +288,7 @@ function RadioOptionsEditor({
                 onChange={(event) =>
                   updateOptionLabel(index, event.target.value)
                 }
-                placeholder={`Option ${index + 1}`}
+                placeholder={`Opzione ${index + 1}`}
                 value={option.label}
               />
               <Button
@@ -306,7 +306,7 @@ function RadioOptionsEditor({
       </div>
       <Button onClick={addOption} size="sm" type="button" variant="outline">
         <PlusIcon className="mr-2 size-4" />
-        Add option
+        Aggiungi opzione
       </Button>
     </div>
   )
@@ -357,7 +357,7 @@ export function SortableFieldEditor({
             <GripVerticalIcon className="size-5" />
           </button>
           <div>
-            <p className="font-medium">{field.label || 'Untitled field'}</p>
+            <p className="font-medium">{field.label || 'Campo senza titolo'}</p>
             <p className="text-muted-foreground text-xs uppercase tracking-wide">
               {field.type}
             </p>
@@ -377,12 +377,12 @@ export function SortableFieldEditor({
                 className="font-medium text-muted-foreground text-xs"
                 htmlFor={`${field.id}-required`}
               >
-                Required
+                Obbligatorio
               </Label>
             </div>
           ) : (
             <span className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-              Static copy
+              Contenuto statico
             </span>
           )}
           <Button
