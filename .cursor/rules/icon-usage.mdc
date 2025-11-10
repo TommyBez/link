@@ -1,0 +1,64 @@
+---
+alwaysApply: true
+---
+
+# Icon Usage Guidelines
+
+## General Rule: Minimize Icon Usage
+
+**Do not overuse icons in page components.** Icons should be used sparingly and only when they add meaningful value to the user experience.
+
+### When to Use Icons
+
+- **Functional actions**: Icons that represent clear actions (e.g., delete, edit, save buttons)
+- **Status indicators**: Critical status information that benefits from visual distinction
+- **Navigation elements**: Menu items, breadcrumbs, or navigation controls
+- **Data visualization**: Charts, graphs, or visual data representations
+
+### When NOT to Use Icons
+
+- **Decorative purposes**: Avoid icons used purely for visual decoration
+- **Redundant information**: Don't add icons when text already clearly communicates the meaning
+- **Page headers**: Page titles and descriptions don't need decorative icons
+- **Informational text**: Status messages, descriptions, or metadata don't require icons
+
+### Best Practices
+
+1. **Prefer text over icons** when the meaning is clear from context
+2. **Use icons consistently** - if you use an icon for one action, use it for similar actions
+3. **Keep icon usage minimal** - a page should rarely need more than 1-2 icons
+4. **Consider accessibility** - icons without labels can be less accessible
+5. **Focus on clarity** - if removing an icon makes the UI cleaner without losing meaning, remove it
+
+### Examples
+
+❌ **Avoid**: Adding decorative icons to page headers
+```tsx
+<div className="flex items-center gap-3">
+  <SparklesIcon className="size-6 text-purple-500" />
+  <h1>Page Title</h1>
+</div>
+```
+
+✅ **Prefer**: Clean text-only headers
+```tsx
+<div>
+  <h1>Page Title</h1>
+  <p>Description text</p>
+</div>
+```
+
+❌ **Avoid**: Icons for informational status messages
+```tsx
+<div className="flex items-center gap-2">
+  <CheckCircle2Icon />
+  <span>Status: Published</span>
+</div>
+```
+
+✅ **Prefer**: Text-only status when clear from context
+```tsx
+<div>
+  <span>Status: Published</span>
+</div>
+```
