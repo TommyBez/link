@@ -115,7 +115,7 @@ export const templateDraft = z.object({
 })
 
 export const templatePublishPayload = z.object({
-  templateId: z.string().uuid(),
+  templateId: z.uuid(),
   payload: templateDraft,
 })
 
