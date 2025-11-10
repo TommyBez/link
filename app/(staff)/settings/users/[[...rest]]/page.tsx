@@ -6,10 +6,10 @@ export default function UsersSettingsPage() {
   return (
     <main className="mx-auto max-w-[960px] px-4 py-10 pb-14">
       <header className="mb-8">
-        <h1 className="font-semibold text-3xl">Team &amp; roles</h1>
+        <h1 className="font-semibold text-3xl">Team e ruoli</h1>
         <p className="mt-2 text-gray-600 leading-relaxed">
-          Manage members, invitations, and roles for your studio using
-          Clerk&apos;s built-in organization tools.
+          Gestisci membri, inviti e ruoli per il tuo studio utilizzando gli
+          strumenti organizzativi integrati di Clerk.
         </p>
       </header>
 

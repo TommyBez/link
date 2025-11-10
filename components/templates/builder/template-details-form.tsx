@@ -64,44 +64,44 @@ export function TemplateDetailsForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Template details</CardTitle>
+        <CardTitle>Dettagli template</CardTitle>
         <CardDescription>
-          These settings help organize templates across studios and locales.
+          Queste impostazioni aiutano a organizzare i template tra studi e localizzazioni.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="template-name">Template name</Label>
+          <Label htmlFor="template-name">Nome template</Label>
           <Input
             id="template-name"
             onChange={(event) => onTemplateNameChange(event.target.value)}
-            placeholder="Informed Consent"
+            placeholder="Consenso informato"
             required
             value={templateName}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="template-description">Description</Label>
+          <Label htmlFor="template-description">Descrizione</Label>
           <Textarea
             id="template-description"
             onChange={(event) => onDescriptionChange(event.target.value)}
-            placeholder="Internal description. Not visible to participants."
+            placeholder="Descrizione interna. Non visibile ai partecipanti."
             rows={3}
             value={description}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="template-locale">Locale</Label>
+          <Label htmlFor="template-locale">Localizzazione</Label>
           <Select onValueChange={onLocaleChange} value={locale}>
             <SelectTrigger className="w-48" id="template-locale">
-              <SelectValue placeholder="Select locale" />
+              <SelectValue placeholder="Seleziona localizzazione" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="it-IT">Italian (Italy)</SelectItem>
-              <SelectItem value="en-US">English (United States)</SelectItem>
-              <SelectItem value="en-GB">English (United Kingdom)</SelectItem>
-              <SelectItem value="es-ES">Spanish (Spain)</SelectItem>
-              <SelectItem value="fr-FR">French (France)</SelectItem>
+              <SelectItem value="it-IT">Italiano (Italia)</SelectItem>
+              <SelectItem value="en-US">Inglese (Stati Uniti)</SelectItem>
+              <SelectItem value="en-GB">Inglese (Regno Unito)</SelectItem>
+              <SelectItem value="es-ES">Spagnolo (Spagna)</SelectItem>
+              <SelectItem value="fr-FR">Francese (Francia)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -111,7 +111,7 @@ export function TemplateDetailsForm({
             htmlFor="template-logo-url"
           >
             <ImageIcon className="size-4 text-muted-foreground" />
-            <span>Logo URL</span>
+            <span>URL Logo</span>
           </Label>
           <Input
             id="template-logo-url"
@@ -124,7 +124,7 @@ export function TemplateDetailsForm({
             value={branding.logoUrl}
           />
           <p className="text-muted-foreground text-xs">
-            Optional. Appears on generated PDFs and client views.
+            Opzionale. Appare sui PDF generati e nelle viste clienti.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
@@ -134,7 +134,7 @@ export function TemplateDetailsForm({
               htmlFor="template-primary-color"
             >
               <PaletteIcon className="size-4 text-muted-foreground" />
-              <span>Primary color</span>
+              <span>Colore primario</span>
             </Label>
             <div className="flex items-center gap-3">
               <span
@@ -153,7 +153,7 @@ export function TemplateDetailsForm({
             </div>
             {primaryColorInvalid ? (
               <p className="text-destructive text-xs">
-                Use a hex value like #2563eb.
+                Usa un valore esadecimale come #2563eb.
               </p>
             ) : null}
           </div>
@@ -163,7 +163,7 @@ export function TemplateDetailsForm({
               htmlFor="template-accent-color"
             >
               <PaletteIcon className="size-4 text-muted-foreground" />
-              <span>Accent color</span>
+              <span>Colore di accento</span>
             </Label>
             <div className="flex items-center gap-3">
               <span
@@ -182,14 +182,14 @@ export function TemplateDetailsForm({
             </div>
             {accentColorInvalid ? (
               <p className="text-destructive text-xs">
-                Use a hex value like #9333ea.
+                Usa un valore esadecimale come #9333ea.
               </p>
             ) : null}
           </div>
         </div>
         <div className="space-y-2">
           <span className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-            Quick palettes
+            Palette rapide
           </span>
           <div className="flex flex-wrap gap-2">
             {COLOR_PALETTES.map((palette) => (

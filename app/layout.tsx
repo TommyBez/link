@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Link - Consent Platform',
-  description: 'Consent management and intake platform',
+  title: 'Link - Piattaforma di Consenso',
+  description: 'Piattaforma di gestione del consenso e raccolta dati',
 }
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
                 <SignedOut>
                   <SignInButton mode="modal">
                     <button className="px-4 py-2 text-sm" type="button">
-                      Sign in
+                      Accedi
                     </button>
                   </SignInButton>
                   <SignUpButton mode="modal">
@@ -52,7 +52,7 @@ export default function RootLayout({
                       className="rounded bg-primary px-4 py-2 text-primary-foreground text-sm hover:opacity-90"
                       type="button"
                     >
-                      Sign up
+                      Registrati
                     </button>
                   </SignUpButton>
                 </SignedOut>

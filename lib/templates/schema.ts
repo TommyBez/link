@@ -2,12 +2,12 @@ import { z } from 'zod'
 
 export const fieldId = z
   .string()
-  .min(1, 'Field id is required')
-  .regex(/^[a-zA-Z0-9_-]+$/, 'Field id must be alphanumeric with - or _')
+  .min(1, 'L\'id del campo è obbligatorio')
+  .regex(/^[a-zA-Z0-9_-]+$/, 'L\'id del campo deve essere alfanumerico con - o _')
 
 const fieldBase = z.object({
   id: fieldId,
-  label: z.string().min(1, 'Field label is required'),
+  label: z.string().min(1, 'L\'etichetta del campo è obbligatoria'),
   helperText: z.string().max(500).optional(),
   required: z.boolean().default(false),
   placeholder: z.string().max(255).optional(),
@@ -31,7 +31,7 @@ const phoneField = fieldBase.extend({
   type: z.literal('phone'),
   pattern: z
     .string()
-    .regex(/^\+?[0-9()\s-]+$/, 'Phone format is invalid')
+    .regex(/^\+?[0-9()\s-]+$/, 'Il formato del telefono non è valido')
     .optional(),
 })
 
@@ -53,15 +53,15 @@ const radioField = fieldBase.extend({
       z.object({
         id: z
           .string()
-          .min(1, 'Option id is required')
+          .min(1, 'L\'id dell\'opzione è obbligatorio')
           .regex(
             /^[a-zA-Z0-9_-]+$/,
-            'Option id must be alphanumeric with - or _',
+            'L\'id dell\'opzione deve essere alfanumerico con - o _',
           ),
-        label: z.string().min(1, 'Option label is required'),
+        label: z.string().min(1, 'L\'etichetta dell\'opzione è obbligatoria'),
       }),
     )
-    .min(2, 'Radio field requires at least two options'),
+    .min(2, 'Il campo radio richiede almeno due opzioni'),
 })
 
 const contentField = fieldBase
@@ -70,8 +70,8 @@ const contentField = fieldBase
     type: z.literal('content'),
     content: z
       .string()
-      .min(1, 'Content block text is required')
-      .max(3000, 'Content block is too long'),
+      .min(1, 'Il testo del blocco contenuto è obbligatorio')
+      .max(3000, 'Il blocco contenuto è troppo lungo'),
     align: z.enum(['start', 'center', 'end']).optional(),
   })
 
@@ -97,21 +97,21 @@ const templateBranding = z
     logoUrl: z.string().url().optional(),
     primaryColor: z
       .string()
-      .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/, 'Primary color must be a hex value')
+      .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/, 'Il colore primario deve essere un valore esadecimale')
       .optional(),
     accentColor: z
       .string()
-      .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/, 'Accent color must be a hex value')
+      .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/, 'Il colore di accento deve essere un valore esadecimale')
       .optional(),
   })
   .optional()
 
 export const templateDraft = z.object({
-  name: z.string().min(1, 'Template name is required'),
+  name: z.string().min(1, 'Il nome del template è obbligatorio'),
   description: z.string().max(500).optional(),
   locale: z.string().optional().default('it-IT'),
   branding: templateBranding,
-  fields: z.array(field).min(1, 'Template requires at least one field'),
+  fields: z.array(field).min(1, 'Il template richiede almeno un campo'),
 })
 
 export const templatePublishPayload = z.object({
