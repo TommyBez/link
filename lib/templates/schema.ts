@@ -109,7 +109,7 @@ const templateBranding = z
 export const templateDraft = z.object({
   name: z.string().min(1, 'Template name is required'),
   description: z.string().max(500).optional(),
-  locale: z.string().default('en-US').optional(),
+  locale: z.string().optional().default('it-IT'),
   branding: templateBranding,
   fields: z.array(field).min(1, 'Template requires at least one field'),
 })
