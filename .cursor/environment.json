@@ -1,0 +1,5 @@
+{
+  "agentCanUpdateSnapshot": true,
+  "install": "pnpm install & pnpm pull-env",
+  "start": "pnpm dev"
+}
