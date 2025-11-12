@@ -276,6 +276,44 @@ export default function NewIntakePage() {
 
     let isCancelled = false
     const POLLING_INTERVAL = 10_000
+    let interval: number | null = null
+
+    function stopPolling() {
+      if (interval) {
+        window.clearInterval(interval)
+        interval = null
+      }
+    }
+
+    function handleExpiredResponse(body: {
+      status?: IntakeStatus
+      expiresAt?: string
+    }) {
+      if (isCancelled) {
+        return
+      }
+      setStatus(body.status ?? 'expired')
+      if (body.expiresAt) {
+        setExpiresAt(body.expiresAt)
+      }
+      stopPolling()
+    }
+
+    function handleSuccessResponse(body: {
+      status: IntakeStatus
+      expiresAt: string | null
+    }) {
+      if (isCancelled) {
+        return
+      }
+      setStatus(body.status)
+      if (body.expiresAt) {
+        setExpiresAt(body.expiresAt)
+      }
+      if (body.status !== 'pending') {
+        stopPolling()
+      }
+    }
 
     async function pollStatus() {
       try {
@@ -289,13 +327,7 @@ export default function NewIntakePage() {
               status?: IntakeStatus
               expiresAt?: string
             }
-            if (isCancelled) {
-              return
-            }
-            setStatus(body.status ?? 'expired')
-            if (body.expiresAt) {
-              setExpiresAt(body.expiresAt)
-            }
+            handleExpiredResponse(body)
             return
           }
           throw new Error(await response.text())
@@ -305,29 +337,18 @@ export default function NewIntakePage() {
           status: IntakeStatus
           expiresAt: string | null
         }
-
-        if (isCancelled) {
-          return
-        }
-        setStatus(body.status)
-        if (body.expiresAt) {
-          setExpiresAt(body.expiresAt)
-        }
-
-        if (body.status !== 'pending') {
-          return
-        }
+        handleSuccessResponse(body)
       } catch (error) {
         console.error(error)
       }
     }
 
-    const interval = window.setInterval(pollStatus, POLLING_INTERVAL)
+    interval = window.setInterval(pollStatus, POLLING_INTERVAL)
     pollStatus()
 
     return () => {
       isCancelled = true
-      window.clearInterval(interval)
+      stopPolling()
     }
   }, [intakeToken, status])
 
