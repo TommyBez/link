@@ -73,13 +73,13 @@ IMPORTANT: As you complete each task, you must check it off in this markdown fil
   - [x] 2.6 Add guard/redirect: authenticated users without a Clerk membership are forced to onboarding until the studio is created; invited members skip onboarding
   - [x] 2.7 Add users management UI at `app/(staff)/settings/users/page.tsx` using Clerk (list members, invite, roles)
   - [x] 2.8 Handle Clerk webhooks in `app/api/webhooks/route.ts` to sync user/org/membership changes (organization/membership created/updated/deleted, invitation accepted)
-- [ ] 3.0 Consent Templates & Builder with publish/versioning
-  - [ ] 3.1 Define template JSON schema/types in `lib/templates/schema.ts` (fields, required, helper text, branding)
-  - [ ] 3.2 Create builder UI at `app/(staff)/templates/new/page.tsx` supporting required MVP field types
-  - [ ] 3.3 Implement `POST /api/templates` (create draft) and `GET /api/templates` (list)
-  - [ ] 3.4 Implement `POST /api/templates/[id]/publish` to create immutable `TemplateVersion`
-  - [ ] 3.5 Enforce that only published versions are selectable for intakes
-  - [ ] 3.6 Seed a sample template for trial accounts (script or API)
+- [x] 3.0 Consent Templates & Builder with publish/versioning
+  - [x] 3.1 Define template JSON schema/types in `lib/templates/schema.ts` (fields, required, helper text, branding)
+  - [x] 3.2 Create builder UI at `app/(staff)/templates/new/page.tsx` supporting required MVP field types
+  - [x] 3.3 Implement `POST /api/templates` (create draft) and `GET /api/templates` (list)
+  - [x] 3.4 Implement `POST /api/templates/[id]/publish` to create immutable `TemplateVersion`
+  - [x] 3.5 Enforce that only published versions are selectable for intakes
+  - [x] 3.6 Seed a sample template for trial accounts (script or API)
 - [ ] 4.0 Intake setup & distribution (tokenized links, QR, prefill, statuses)
   - [ ] 4.1 Build intake prep UI at `app/(staff)/intakes/new/page.tsx` (select version, copy link, QR)
   - [ ] 4.2 Implement `POST /api/intakes` to create tokenized `IntakeSession` with TTL
