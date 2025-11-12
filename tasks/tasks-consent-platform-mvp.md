@@ -80,12 +80,12 @@ IMPORTANT: As you complete each task, you must check it off in this markdown fil
   - [x] 3.4 Implement `POST /api/templates/[id]/publish` to create immutable `TemplateVersion`
   - [x] 3.5 Enforce that only published versions are selectable for intakes
   - [x] 3.6 Seed a sample template for trial accounts (script or API)
-- [ ] 4.0 Intake setup & distribution (tokenized links, QR, prefill, statuses)
-  - [ ] 4.1 Build intake prep UI at `app/(staff)/intakes/new/page.tsx` (select version, copy link, QR)
-  - [ ] 4.2 Implement `POST /api/intakes` to create tokenized `IntakeSession` with TTL
-  - [ ] 4.3 Implement `GET /api/intakes/[token]` to load template version & intake status
-  - [ ] 4.4 Support prefill mapping from query params to schema fields
-  - [ ] 4.5 Show pending vs completed status for intakes in staff UI
+- [x] 4.0 Intake setup & distribution (tokenized links, QR, prefill, statuses)
+  - [x] 4.1 Build intake prep UI at `app/(staff)/intakes/new/page.tsx` (select version, copy link, QR)
+  - [x] 4.2 Implement `POST /api/intakes` to create tokenized `IntakeSession` with TTL
+  - [x] 4.3 Implement `GET /api/intakes/[token]` to load template version & intake status
+  - [x] 4.4 Support prefill mapping from query params to schema fields
+  - [x] 4.5 Show pending vs completed status for intakes in staff UI
 - [ ] 5.0 Client intake form & signature capture (mobile-first, autosave, accessibility)
   - [ ] 5.1 Implement client form at `app/(client)/intake/[token]/page.tsx` rendering fields from schema
   - [ ] 5.2 Create `components/signature-pad.tsx` to capture signature image + metadata (UTC, IP, user agent)

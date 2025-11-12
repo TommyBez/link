@@ -64,8 +64,8 @@ export function FormFieldsSection({
       <CardHeader className="overflow-hidden">
         <CardTitle>Campi del modulo</CardTitle>
         <CardDescription>
-          Trascina per riordinare i campi. Configura etichette, requisiti e testo
-          di aiuto.
+          Trascina per riordinare i campi. Configura etichette, requisiti e
+          testo di aiuto.
         </CardDescription>
         <CardAction className="w-fit min-w-0 max-w-full">
           <div className="flex flex-wrap items-center gap-2">
