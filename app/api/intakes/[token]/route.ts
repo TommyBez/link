@@ -47,8 +47,6 @@ export async function GET(request: NextRequest, { params }: GetContext) {
       },
     })
 
-    console.log('session', session)
-
     if (!session) {
       return NextResponse.json(
         { error: 'Sessione di intake non trovata.' },
@@ -60,24 +58,16 @@ export async function GET(request: NextRequest, { params }: GetContext) {
       return NextResponse.json(
         {
           status: 'expired',
-          expiresAt: session.expiresAt?.toISOString() ?? null,
+          expiresAt: session.expiresAt.toISOString(),
         },
         { status: 410 },
       )
     }
 
     const templateVersion = session.templateVersion
-
-    if (!templateVersion) {
-      return NextResponse.json(
-        { error: 'Versione del template non disponibile.' },
-        { status: 500 },
-      )
-    }
-
     const template = templateVersion.template
 
-    if (!template || template.orgId !== session.orgId) {
+    if (template.orgId !== session.orgId) {
       return NextResponse.json(
         { error: 'Sessione di intake non valida per questa organizzazione.' },
         { status: 404 },
@@ -89,7 +79,7 @@ export async function GET(request: NextRequest, { params }: GetContext) {
 
     return NextResponse.json({
       status: session.status,
-      expiresAt: session.expiresAt?.toISOString() ?? null,
+      expiresAt: session.expiresAt.toISOString(),
       template: {
         id: templateVersion.templateId,
         version: templateVersion.version,

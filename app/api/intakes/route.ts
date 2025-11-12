@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         token: created.token,
-        expiresAt: created.expiresAt?.toISOString() ?? expiresAt.toISOString(),
+        expiresAt: created.expiresAt.toISOString(),
       },
       { status: 201 },
     )

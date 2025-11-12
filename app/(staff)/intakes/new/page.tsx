@@ -158,13 +158,11 @@ export default function NewIntakePage() {
               versionsSource = []
             }
 
-            const versions = versionsSource
-              .filter((version) => version != null)
-              .map((version) => ({
-                id: version.id,
-                version: version.version,
-                publishedAt: version.publishedAt,
-              }))
+            const versions = versionsSource.map((version) => ({
+              id: version.id,
+              version: version.version,
+              publishedAt: version.publishedAt,
+            }))
 
             return {
               id: template.id,
@@ -279,32 +277,6 @@ export default function NewIntakePage() {
     let isCancelled = false
     const POLLING_INTERVAL = 10_000
 
-    async function handleExpiredResponse(body: {
-      status?: IntakeStatus
-      expiresAt?: string
-    }) {
-      if (isCancelled) {
-        return
-      }
-      setStatus(body.status ?? 'expired')
-      if (body.expiresAt) {
-        setExpiresAt(body.expiresAt)
-      }
-    }
-
-    async function handleSuccessResponse(body: {
-      status: IntakeStatus
-      expiresAt: string | null
-    }) {
-      if (isCancelled) {
-        return
-      }
-      setStatus(body.status)
-      if (body.expiresAt) {
-        setExpiresAt(body.expiresAt)
-      }
-    }
-
     async function pollStatus() {
       try {
         const response = await fetch(`/api/intakes/${intakeToken}`, {
@@ -317,7 +289,13 @@ export default function NewIntakePage() {
               status?: IntakeStatus
               expiresAt?: string
             }
-            await handleExpiredResponse(body)
+            if (isCancelled) {
+              return
+            }
+            setStatus(body.status ?? 'expired')
+            if (body.expiresAt) {
+              setExpiresAt(body.expiresAt)
+            }
             return
           }
           throw new Error(await response.text())
@@ -328,7 +306,13 @@ export default function NewIntakePage() {
           expiresAt: string | null
         }
 
-        await handleSuccessResponse(body)
+        if (isCancelled) {
+          return
+        }
+        setStatus(body.status)
+        if (body.expiresAt) {
+          setExpiresAt(body.expiresAt)
+        }
 
         if (body.status !== 'pending') {
           return

@@ -12,9 +12,10 @@ type QrCodeProps = {
 
 function clearCanvas(canvas: HTMLCanvasElement) {
   const context = canvas.getContext('2d')
-  if (context) {
-    context.clearRect(0, 0, canvas.width, canvas.height)
+  if (!context) {
+    throw new Error('Failed to get 2d context')
   }
+  context.clearRect(0, 0, canvas.width, canvas.height)
 }
 
 async function generateQRCode(
