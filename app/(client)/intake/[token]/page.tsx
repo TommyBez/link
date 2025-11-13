@@ -137,7 +137,7 @@ function statusLabel(status: IntakeStatus): string {
 export default async function IntakePage({
   params,
   searchParams,
-}: PageParams): Promise<JSX.Element> {
+}: PageParams) {
   const { token } = params
 
   const session = await db.query.intakeSessions.findFirst({

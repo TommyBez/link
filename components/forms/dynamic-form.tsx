@@ -263,6 +263,10 @@ export function DynamicForm({
 function buildFieldRules(field: FieldInput) {
   const rules: Record<string, unknown> = {}
 
+  if (field.type === 'content') {
+    return rules
+  }
+
   if (field.required && field.type !== 'checkbox') {
     rules.required = 'Questo campo è obbligatorio.'
   }
@@ -343,6 +347,10 @@ function renderFieldControl({
   isSubmitting: boolean
   branding: TemplateDraftInput['branding'] | null
 }) {
+  if (field.type === 'content') {
+    return null
+  }
+
   const commonInputProps = {
     onBlur: controller.onBlur,
     disabled: isSubmitting,
@@ -369,10 +377,7 @@ function renderFieldControl({
           : field.type === 'email'
             ? 'email'
             : undefined
-      const maxLength =
-        field.type === 'text' || field.type === 'email'
-          ? field.maxLength
-          : undefined
+      const maxLength = field.type === 'text' ? field.maxLength : undefined
       return (
         <Input
           type={inputType}

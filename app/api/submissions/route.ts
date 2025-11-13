@@ -89,6 +89,9 @@ function ensureRequiredFields(
   const missing: string[] = []
 
   for (const field of fields) {
+    if (field.type === 'content') {
+      continue
+    }
     if (!field.required) {
       continue
     }
@@ -147,15 +150,19 @@ function parseSignaturePayload(input: unknown): SignaturePayload | null {
 }
 
 function extractDataUrl(dataUrl: string): { buffer: Buffer; contentType: string } {
-  const matches = dataUrl.match(/^data:(?<mime>[^;]+);base64,(?<data>.+)$/u)
-  if (!matches?.groups?.mime || !matches.groups.data) {
+  const matches = dataUrl.match(/^data:([^;]+);base64,(.+)$/u)
+  if (!matches) {
     throw new Error('Formato della firma non valido.')
   }
-  const contentType = matches.groups.mime
+  const [, mime, encoded] = matches
+  if (!mime || !encoded) {
+    throw new Error('Formato della firma non valido.')
+  }
+  const contentType = mime
   if (contentType !== 'image/png') {
     throw new Error('La firma deve essere in formato PNG.')
   }
-  const buffer = Buffer.from(matches.groups.data, 'base64')
+  const buffer = Buffer.from(encoded, 'base64')
   return { buffer, contentType }
 }
 
