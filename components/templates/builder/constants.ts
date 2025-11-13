@@ -67,7 +67,7 @@ export const INITIAL_CATALOG: FieldCatalogItem[] = [
       id: crypto.randomUUID(),
       type: 'phone',
       label: 'Numero di telefono',
-      helperText: 'Includi il prefisso internazionale se fuori dall\'Italia.',
+      helperText: "Includi il prefisso internazionale se fuori dall'Italia.",
       required: false,
       placeholder: '+39 123 456 7890',
     }),
@@ -104,7 +104,7 @@ export const INITIAL_CATALOG: FieldCatalogItem[] = [
     create: () => ({
       id: crypto.randomUUID(),
       type: 'radio',
-      label: 'Seleziona un\'opzione',
+      label: "Seleziona un'opzione",
       helperText: '',
       required: false,
       options: [
@@ -136,7 +136,7 @@ export const INITIAL_CATALOG: FieldCatalogItem[] = [
       type: 'signature',
       label: 'Firma',
       helperText:
-        'Firma usando il dito o il mouse per confermare l\'accuratezza delle informazioni fornite.',
+        "Firma usando il dito o il mouse per confermare l'accuratezza delle informazioni fornite.",
       required: true,
       acknowledgementText:
         'Certifico che le informazioni fornite sono accurate secondo la mia conoscenza.',

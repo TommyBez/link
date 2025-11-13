@@ -66,7 +66,8 @@ export function TemplateDetailsForm({
       <CardHeader>
         <CardTitle>Dettagli template</CardTitle>
         <CardDescription>
-          Queste impostazioni aiutano a organizzare i template tra studi e localizzazioni.
+          Queste impostazioni aiutano a organizzare i template tra studi e
+          localizzazioni.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

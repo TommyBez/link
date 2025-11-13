@@ -202,6 +202,7 @@ export async function GET(request: NextRequest) {
           updatedAt: template.updatedAt?.toISOString() ?? null,
           draft: draftVersion
             ? {
+                id: draftVersion.id,
                 checksum: draftVersion.checksum,
                 updatedAt: draftVersion.publishedAt.toISOString(),
                 schema: draftVersion.schemaJson as TemplateDraftInput,
@@ -209,6 +210,7 @@ export async function GET(request: NextRequest) {
             : null,
           latestPublished: latestPublished
             ? {
+                id: latestPublished.id,
                 version: latestPublished.version,
                 checksum: latestPublished.checksum,
                 publishedAt: latestPublished.publishedAt.toISOString(),
@@ -217,6 +219,7 @@ export async function GET(request: NextRequest) {
             : null,
           versions: includeVersions
             ? publishedVersions.map((version) => ({
+                id: version.id,
                 version: version.version,
                 checksum: version.checksum,
                 publishedAt: version.publishedAt.toISOString(),

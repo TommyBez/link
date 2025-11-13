@@ -130,8 +130,8 @@ export const intakeSessions = pgTable(
     templateVersionId: uuid('template_version_id')
       .notNull()
       .references(() => templateVersions.id, { onDelete: 'restrict' }),
-    status: varchar('status', { length: 50 }).notNull(), // 'pending' | 'completed' | 'expired'
-    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    status: varchar('status', { length: 50 }).notNull().default('pending'), // 'pending' | 'completed' | 'expired'
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -140,6 +140,7 @@ export const intakeSessions = pgTable(
     uniqueIndex('intake_sessions_token_idx').on(table.token),
     index('intake_sessions_org_id_idx').on(table.orgId),
     index('intake_sessions_status_idx').on(table.status),
+    index('intake_sessions_expires_at_idx').on(table.expiresAt),
   ],
 )
 

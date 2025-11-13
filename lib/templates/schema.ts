@@ -2,12 +2,15 @@ import { z } from 'zod'
 
 export const fieldId = z
   .string()
-  .min(1, 'L\'id del campo è obbligatorio')
-  .regex(/^[a-zA-Z0-9_-]+$/, 'L\'id del campo deve essere alfanumerico con - o _')
+  .min(1, "L'id del campo è obbligatorio")
+  .regex(
+    /^[a-zA-Z0-9_-]+$/,
+    "L'id del campo deve essere alfanumerico con - o _",
+  )
 
 const fieldBase = z.object({
   id: fieldId,
-  label: z.string().min(1, 'L\'etichetta del campo è obbligatoria'),
+  label: z.string().min(1, "L'etichetta del campo è obbligatoria"),
   helperText: z.string().max(500).optional(),
   required: z.boolean().default(false),
   placeholder: z.string().max(255).optional(),
@@ -53,12 +56,12 @@ const radioField = fieldBase.extend({
       z.object({
         id: z
           .string()
-          .min(1, 'L\'id dell\'opzione è obbligatorio')
+          .min(1, "L'id dell'opzione è obbligatorio")
           .regex(
             /^[a-zA-Z0-9_-]+$/,
-            'L\'id dell\'opzione deve essere alfanumerico con - o _',
+            "L'id dell'opzione deve essere alfanumerico con - o _",
           ),
-        label: z.string().min(1, 'L\'etichetta dell\'opzione è obbligatoria'),
+        label: z.string().min(1, "L'etichetta dell'opzione è obbligatoria"),
       }),
     )
     .min(2, 'Il campo radio richiede almeno due opzioni'),
@@ -97,11 +100,17 @@ const templateBranding = z
     logoUrl: z.string().url().optional(),
     primaryColor: z
       .string()
-      .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/, 'Il colore primario deve essere un valore esadecimale')
+      .regex(
+        /^#(?:[0-9a-fA-F]{3}){1,2}$/,
+        'Il colore primario deve essere un valore esadecimale',
+      )
       .optional(),
     accentColor: z
       .string()
-      .regex(/^#(?:[0-9a-fA-F]{3}){1,2}$/, 'Il colore di accento deve essere un valore esadecimale')
+      .regex(
+        /^#(?:[0-9a-fA-F]{3}){1,2}$/,
+        'Il colore di accento deve essere un valore esadecimale',
+      )
       .optional(),
   })
   .optional()
