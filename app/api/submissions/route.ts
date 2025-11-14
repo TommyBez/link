@@ -1,9 +1,12 @@
 import { eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
+import { start } from 'workflow/api'
 import { db } from '@/lib/db'
 import { intakeSessions, signatures, submissions } from '@/lib/db/schema'
+import { upsertPdfArtifactMeta } from '@/lib/pdf/artifacts'
 import { putSignature } from '@/lib/storage/blob'
 import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
+import { generatePdfWorkflow } from '@/lib/workflows/pdf-generation'
 
 const DATA_URL_REGEX = /^data:([^;]+);base64,(.+)$/u
 
@@ -535,6 +538,8 @@ export async function POST(request: NextRequest) {
       }),
     )
 
+    await enqueuePdfGeneration(submissionId)
+
     return NextResponse.json(
       {
         submissionId,
@@ -554,6 +559,27 @@ export async function POST(request: NextRequest) {
       { error: 'Impossibile registrare la sottomissione.' },
       { status: 500 },
     )
+  }
+}
+
+async function enqueuePdfGeneration(submissionId: string): Promise<void> {
+  try {
+    const run = await start(generatePdfWorkflow, [submissionId])
+    await upsertPdfArtifactMeta(submissionId, {
+      status: 'queued',
+      workflowRunId: run.runId,
+      error: null,
+    })
+  } catch (error) {
+    console.error('Failed to start PDF generation workflow', error)
+    await upsertPdfArtifactMeta(submissionId, {
+      status: 'failed',
+      workflowRunId: null,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Unable to start PDF generation workflow',
+    })
   }
 }
 

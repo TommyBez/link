@@ -238,6 +238,7 @@ export const pdfArtifacts = pgTable(
     status: pdfArtifactStatus('status').notNull().default('queued'),
     sizeBytes: integer('size_bytes'),
     checksum: varchar('checksum', { length: 64 }),
+    workflowRunId: varchar('workflow_run_id', { length: 255 }),
     error: text('error'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
