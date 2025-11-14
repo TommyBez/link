@@ -119,14 +119,12 @@ export function useLocalProgress({
       previousSchemaMetaRef.current !== schemaMetaString
     const hasStorageKeyChanged = previousStorageKeyRef.current !== storageKey
 
-    // Only run if something actually changed
     if (
       !(hasBaseValuesChanged || hasSchemaMetaChanged || hasStorageKeyChanged)
     ) {
       return
     }
 
-    // Update refs
     previousBaseValuesRef.current = baseValuesString
     previousSchemaMetaRef.current = schemaMetaString
     previousStorageKeyRef.current = storageKey
