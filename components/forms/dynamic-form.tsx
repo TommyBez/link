@@ -343,7 +343,7 @@ function buildFieldRules(field: FieldInput) {
   if (field.type === 'email') {
     rules.pattern = {
       value: EMAIL_REGEX,
-      message: "Inserisci un'indirizzo email valido.",
+      message: "Inserisci un indirizzo email valido.",
     }
   }
 
