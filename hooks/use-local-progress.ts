@@ -43,6 +43,46 @@ function shouldDiscardStoredMeta(
   return false
 }
 
+function parseStoredProgress(
+  raw: string,
+  baseValues: Record<string, unknown>,
+  schemaMeta: Record<string, unknown> | undefined,
+): Record<string, unknown> | null {
+  try {
+    const parsed = JSON.parse(raw) as StoredProgress
+    if (
+      !(isRecord(parsed) && isRecord(parsed.values)) ||
+      shouldDiscardStoredMeta(
+        isRecord(parsed.meta) ? parsed.meta : undefined,
+        schemaMeta,
+      )
+    ) {
+      return null
+    }
+    return { ...baseValues, ...parsed.values }
+  } catch {
+    return null
+  }
+}
+
+function restoreFromStorage(
+  storageKey: string,
+  baseValues: Record<string, unknown>,
+  schemaMeta: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  try {
+    const raw = window.localStorage.getItem(storageKey)
+    if (!raw) {
+      return baseValues
+    }
+    const merged = parseStoredProgress(raw, baseValues, schemaMeta)
+    return merged ?? baseValues
+  } catch (error) {
+    console.error('Impossibile recuperare i progressi locali', error)
+    return baseValues
+  }
+}
+
 export function useLocalProgress({
   storageKey,
   initialValues,
@@ -62,40 +102,39 @@ export function useLocalProgress({
     [initialValues],
   )
 
+  const previousBaseValuesRef = useRef<string>('')
+  const previousSchemaMetaRef = useRef<string>('')
+  const previousStorageKeyRef = useRef<string>('')
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
 
-    try {
-      const raw = window.localStorage.getItem(storageKey)
-      if (!raw) {
-        setRestoredValues(baseValues)
-        setIsHydrated(true)
-        return
-      }
-      const parsed = JSON.parse(raw) as StoredProgress
-      if (
-        !(isRecord(parsed) && isRecord(parsed.values)) ||
-        shouldDiscardStoredMeta(
-          isRecord(parsed.meta) ? parsed.meta : undefined,
-          schemaMeta,
-        )
-      ) {
-        setRestoredValues(baseValues)
-        setIsHydrated(true)
-        return
-      }
+    const baseValuesString = JSON.stringify(baseValues)
+    const schemaMetaString = JSON.stringify(schemaMeta)
+    const hasBaseValuesChanged =
+      previousBaseValuesRef.current !== baseValuesString
+    const hasSchemaMetaChanged =
+      previousSchemaMetaRef.current !== schemaMetaString
+    const hasStorageKeyChanged = previousStorageKeyRef.current !== storageKey
 
-      const merged = { ...baseValues, ...parsed.values }
-      latestValuesRef.current = merged
-      setRestoredValues(merged)
-    } catch (error) {
-      console.error('Impossibile recuperare i progressi locali', error)
-      setRestoredValues(baseValues)
-    } finally {
-      setIsHydrated(true)
+    // Only run if something actually changed
+    if (
+      !(hasBaseValuesChanged || hasSchemaMetaChanged || hasStorageKeyChanged)
+    ) {
+      return
     }
+
+    // Update refs
+    previousBaseValuesRef.current = baseValuesString
+    previousSchemaMetaRef.current = schemaMetaString
+    previousStorageKeyRef.current = storageKey
+
+    const restored = restoreFromStorage(storageKey, baseValues, schemaMeta)
+    latestValuesRef.current = restored
+    setRestoredValues(restored)
+    setIsHydrated(true)
   }, [baseValues, schemaMeta, storageKey])
 
   const saveProgress = useCallback(
