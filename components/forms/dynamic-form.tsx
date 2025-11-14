@@ -332,7 +332,11 @@ function buildFieldRules(field: FieldInput) {
     return rules
   }
 
-  if (field.required && field.type !== 'checkbox') {
+  if (
+    field.required &&
+    field.type !== 'checkbox' &&
+    field.type !== 'signature'
+  ) {
     rules.required = 'Questo campo è obbligatorio.'
   }
 
