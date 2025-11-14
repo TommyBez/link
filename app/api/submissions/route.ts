@@ -86,6 +86,31 @@ function sanitizeFieldValue(field: FieldInput, value: unknown): unknown {
   }
 }
 
+function isFieldValueEmpty(
+  field: FieldInput,
+  value: unknown,
+  signature: SignaturePayload | null,
+): boolean {
+  switch (field.type) {
+    case 'text':
+    case 'email':
+    case 'phone':
+    case 'textarea':
+    case 'date':
+    case 'radio': {
+      return typeof value !== 'string' || value.length === 0
+    }
+    case 'checkbox': {
+      return !coerceCheckbox(value)
+    }
+    case 'signature': {
+      return !signature || typeof signature.dataUrl !== 'string'
+    }
+    default:
+      return false
+  }
+}
+
 function ensureRequiredFields(
   fields: TemplateDraftInput['fields'],
   responses: Record<string, unknown>,
@@ -94,39 +119,12 @@ function ensureRequiredFields(
   const missing: string[] = []
 
   for (const field of fields) {
-    if (field.type === 'content') {
-      continue
-    }
-    if (!field.required) {
+    if (field.type === 'content' || !field.required) {
       continue
     }
     const currentValue = responses[field.id]
-    switch (field.type) {
-      case 'text':
-      case 'email':
-      case 'phone':
-      case 'textarea':
-      case 'date':
-      case 'radio': {
-        if (typeof currentValue !== 'string' || currentValue.length === 0) {
-          missing.push(field.label)
-        }
-        break
-      }
-      case 'checkbox': {
-        if (!coerceCheckbox(currentValue)) {
-          missing.push(field.label)
-        }
-        break
-      }
-      case 'signature': {
-        if (!signature || typeof signature.dataUrl !== 'string') {
-          missing.push(field.label)
-        }
-        break
-      }
-      default:
-        break
+    if (isFieldValueEmpty(field, currentValue, signature)) {
+      missing.push(field.label)
     }
   }
 
@@ -241,76 +239,278 @@ function inferPhone(
   return coerceString(responses[field.id])
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const payload = (await request.json()) as SubmissionPayload
-    if (!isRecord(payload)) {
-      return NextResponse.json(
+type ValidatedPayload = {
+  token: string
+  responses: Record<string, unknown>
+  signature: SignaturePayload | null
+}
+
+function validatePayload(
+  payload: unknown,
+):
+  | { valid: true; data: ValidatedPayload }
+  | { valid: false; response: NextResponse } {
+  if (!isRecord(payload)) {
+    return {
+      valid: false,
+      response: NextResponse.json(
         { error: 'Payload non valido.' },
         { status: 400 },
-      )
+      ),
     }
+  }
 
-    const token = typeof payload.token === 'string' ? payload.token : null
-    if (!token) {
-      return NextResponse.json(
+  const token = typeof payload.token === 'string' ? payload.token : null
+  if (!token) {
+    return {
+      valid: false,
+      response: NextResponse.json(
         { error: 'Token della sessione mancante.' },
         { status: 400 },
-      )
+      ),
     }
+  }
 
-    if (!isRecord(payload.responses)) {
-      return NextResponse.json(
+  if (!isRecord(payload.responses)) {
+    return {
+      valid: false,
+      response: NextResponse.json(
         { error: 'Risposte non valide.' },
         { status: 400 },
-      )
+      ),
     }
+  }
 
-    const signaturePayload = parseSignaturePayload(payload.signature ?? null)
+  return {
+    valid: true,
+    data: {
+      token,
+      responses: payload.responses,
+      signature: parseSignaturePayload(payload.signature ?? null),
+    },
+  }
+}
 
-    // Fetch session outside transaction for initial validation
-    const session = await db.query.intakeSessions.findFirst({
-      where: (sessionTable, { eq: equals }) =>
-        equals(sessionTable.token, token),
-      with: {
-        templateVersion: {
-          with: {
-            template: true,
-          },
+async function fetchAndValidateSession(
+  token: string,
+): Promise<
+  | { valid: true; session: SessionWithTemplate }
+  | { valid: false; response: NextResponse }
+> {
+  const session = await db.query.intakeSessions.findFirst({
+    where: (sessionTable, { eq: equals }) => equals(sessionTable.token, token),
+    with: {
+      templateVersion: {
+        with: {
+          template: true,
         },
       },
-    })
+    },
+  })
 
-    if (!session) {
-      return NextResponse.json(
+  if (!session) {
+    return {
+      valid: false,
+      response: NextResponse.json(
         { error: 'Sessione di intake non trovata.' },
         { status: 404 },
-      )
+      ),
     }
+  }
 
-    // Check expiration outside transaction (doesn't need DB-level consistency)
-    if (isExpired(session.expiresAt)) {
-      return NextResponse.json(
+  if (isExpired(session.expiresAt)) {
+    return {
+      valid: false,
+      response: NextResponse.json(
         {
           error: 'La sessione è scaduta.',
           status: 'expired',
           expiresAt: session.expiresAt.toISOString(),
         },
         { status: 410 },
-      )
+      ),
+    }
+  }
+
+  return { valid: true, session }
+}
+
+type SessionWithTemplate = NonNullable<
+  Awaited<
+    ReturnType<
+      typeof db.query.intakeSessions.findFirst<{
+        with: {
+          templateVersion: {
+            with: {
+              template: true
+            }
+          }
+        }
+      }>
+    >
+  >
+>
+
+function sanitizeResponses(
+  schema: TemplateDraftInput,
+  rawResponses: Record<string, unknown>,
+): Record<string, unknown> {
+  const sanitizedResponses: Record<string, unknown> = {}
+  for (const field of schema.fields) {
+    if (field.type === 'content') {
+      continue
+    }
+    const value = rawResponses[field.id]
+    sanitizedResponses[field.id] = sanitizeFieldValue(field, value)
+  }
+  return sanitizedResponses
+}
+
+function processSignature(
+  signaturePayload: SignaturePayload | null,
+):
+  | { success: true; file: { buffer: Buffer; contentType: string } | null }
+  | { success: false; response: NextResponse } {
+  if (!signaturePayload) {
+    return { success: true, file: null }
+  }
+  try {
+    const file = extractDataUrl(signaturePayload.dataUrl)
+    return { success: true, file }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Firma non valida.'
+    return {
+      success: false,
+      response: NextResponse.json({ error: message }, { status: 400 }),
+    }
+  }
+}
+
+type SubmissionTransactionParams = {
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0]
+  session: SessionWithTemplate
+  sanitizedResponses: Record<string, unknown>
+  respondentName: string | null
+  respondentEmail: string | null
+  respondentPhone: string | null
+  signaturePayload: SignaturePayload | null
+  signatureFile: { buffer: Buffer; contentType: string } | null
+  request: NextRequest
+}
+
+async function createSubmissionInTransaction(
+  params: SubmissionTransactionParams,
+): Promise<string> {
+  const {
+    tx,
+    session,
+    sanitizedResponses,
+    respondentName,
+    respondentEmail,
+    respondentPhone,
+    signaturePayload,
+    signatureFile,
+    request,
+  } = params
+  // Re-check session status inside transaction to prevent race conditions
+  const [lockedSession] = await tx
+    .select()
+    .from(intakeSessions)
+    .where(eq(intakeSessions.id, session.id))
+    .limit(1)
+
+  if (!lockedSession) {
+    throw new Error('Sessione di intake non trovata.')
+  }
+
+  if (lockedSession.status === 'completed') {
+    throw new Error('CONFLICT: Questa sessione è già stata completata.')
+  }
+
+  // Insert submission - unique constraint on intakeSessionId will prevent duplicates
+  let submission: { id: string } | undefined
+  try {
+    const [inserted] = await tx
+      .insert(submissions)
+      .values({
+        intakeSessionId: session.id,
+        templateVersionId: session.templateVersionId,
+        orgId: session.orgId,
+        status: 'submitted',
+        submittedAt: new Date(),
+        responseData: sanitizedResponses,
+        respondentName,
+        respondentEmail,
+        respondentPhone,
+      })
+      .returning({ id: submissions.id })
+    submission = inserted
+  } catch (error) {
+    // Handle unique constraint violation (duplicate submission)
+    if (
+      error instanceof Error &&
+      (error.message.includes('unique') ||
+        error.message.includes('duplicate') ||
+        error.message.includes('violates unique constraint'))
+    ) {
+      throw new Error('CONFLICT: Questa sessione è già stata completata.')
+    }
+    throw error
+  }
+
+  if (!submission) {
+    throw new Error('Impossibile creare la sottomissione.')
+  }
+
+  if (signaturePayload && signatureFile) {
+    const uploadResult = await putSignature(
+      `${submission.id}.png`,
+      signatureFile.buffer,
+      signatureFile.contentType,
+    )
+    const signerName =
+      signaturePayload.signerName ?? respondentName ?? 'Firmatario'
+    await tx.insert(signatures).values({
+      submissionId: submission.id,
+      signerName,
+      signedAtUtc: new Date(),
+      ipAddress: extractClientIp(request),
+      userAgent: request.headers.get('user-agent'),
+      blobUrl: uploadResult.url,
+    })
+  }
+
+  // Update session status inside the same transaction
+  await tx
+    .update(intakeSessions)
+    .set({ status: 'completed' })
+    .where(eq(intakeSessions.id, session.id))
+
+  return submission.id
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const payload = (await request.json()) as SubmissionPayload
+    const payloadValidation = validatePayload(payload)
+    if (!payloadValidation.valid) {
+      return payloadValidation.response
     }
 
+    const {
+      token,
+      responses: rawResponses,
+      signature: signaturePayload,
+    } = payloadValidation.data
+
+    const sessionValidation = await fetchAndValidateSession(token)
+    if (!sessionValidation.valid) {
+      return sessionValidation.response
+    }
+
+    const session = sessionValidation.session
     const schema = session.templateVersion.schemaJson as TemplateDraftInput
-    const rawResponses = payload.responses as Record<string, unknown>
-    const sanitizedResponses: Record<string, unknown> = {}
-
-    for (const field of schema.fields) {
-      if (field.type === 'content') {
-        continue
-      }
-      const value = rawResponses[field.id]
-      sanitizedResponses[field.id] = sanitizeFieldValue(field, value)
-    }
+    const sanitizedResponses = sanitizeResponses(schema, rawResponses)
 
     const missingFields = ensureRequiredFields(
       schema.fields,
@@ -328,15 +528,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let signatureFile: { buffer: Buffer; contentType: string } | null = null
-    if (signaturePayload) {
-      try {
-        signatureFile = extractDataUrl(signaturePayload.dataUrl)
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : 'Firma non valida.'
-        return NextResponse.json({ error: message }, { status: 400 })
-      }
+    const signatureResult = processSignature(signaturePayload)
+    if (!signatureResult.success) {
+      return signatureResult.response
     }
 
     const respondentName = inferRespondentName(
@@ -346,87 +540,19 @@ export async function POST(request: NextRequest) {
     const respondentEmail = inferEmail(schema.fields, sanitizedResponses)
     const respondentPhone = inferPhone(schema.fields, sanitizedResponses)
 
-    const submissionId = await db.transaction(async (tx) => {
-      // Re-check session status inside transaction to prevent race conditions
-      const [lockedSession] = await tx
-        .select()
-        .from(intakeSessions)
-        .where(eq(intakeSessions.id, session.id))
-        .limit(1)
-
-      if (!lockedSession) {
-        throw new Error('Sessione di intake non trovata.')
-      }
-
-      if (lockedSession.status === 'completed') {
-        throw new Error('CONFLICT: Questa sessione è già stata completata.')
-      }
-
-      // Insert submission - unique constraint on intakeSessionId will prevent duplicates
-      let submission: { id: string } | undefined
-      try {
-        const [inserted] = await tx
-          .insert(submissions)
-          .values({
-            intakeSessionId: session.id,
-            templateVersionId: session.templateVersionId,
-            orgId: session.orgId,
-            status: 'submitted',
-            submittedAt: new Date(),
-            responseData: sanitizedResponses,
-            respondentName,
-            respondentEmail,
-            respondentPhone,
-          })
-          .returning({ id: submissions.id })
-        submission = inserted
-      } catch (error) {
-        // Handle unique constraint violation (duplicate submission)
-        if (
-          error instanceof Error &&
-          (error.message.includes('unique') ||
-            error.message.includes('duplicate') ||
-            error.message.includes('violates unique constraint'))
-        ) {
-          throw new Error('CONFLICT: Questa sessione è già stata completata.')
-        }
-        throw error
-      }
-
-      if (!submission) {
-        throw new Error('Impossibile creare la sottomissione.')
-      }
-
-      let blobUrl: string | null = null
-      let signerName: string | undefined = signaturePayload?.signerName
-      if (signaturePayload && signatureFile) {
-        const uploadResult = await putSignature(
-          `${submission.id}.png`,
-          signatureFile.buffer,
-          signatureFile.contentType,
-        )
-        blobUrl = uploadResult.url
-        if (!signerName) {
-          signerName = respondentName ?? 'Firmatario'
-        }
-        await tx.insert(signatures).values({
-          submissionId: submission.id,
-          signerName: signerName ?? 'Firmatario',
-          signedAtUtc: new Date(),
-          ipAddress: extractClientIp(request),
-          userAgent: request.headers.get('user-agent'),
-          blobUrl,
-        })
-      }
-
-      // Update session status inside the same transaction
-      await tx
-        .update(intakeSessions)
-        .set({ status: 'completed' })
-        .where(eq(intakeSessions.id, session.id))
-
-      return submission.id
-    })
+    const submissionId = await db.transaction(async (tx) =>
+      createSubmissionInTransaction({
+        tx,
+        session,
+        sanitizedResponses,
+        respondentName,
+        respondentEmail,
+        respondentPhone,
+        signaturePayload,
+        signatureFile: signatureResult.file,
+        request,
+      }),
+    )
 
     return NextResponse.json(
       {
