@@ -123,8 +123,13 @@ export function DynamicForm({
     defaultValues,
   })
 
+  const previousDefaultValuesRef = useRef<string>('')
   useEffect(() => {
-    form.reset(defaultValues)
+    const currentValuesString = JSON.stringify(defaultValues)
+    if (previousDefaultValuesRef.current !== currentValuesString) {
+      previousDefaultValuesRef.current = currentValuesString
+      form.reset(defaultValues)
+    }
   }, [defaultValues, form])
 
   const autosaveTimeoutRef = useRef<number | null>(null)
