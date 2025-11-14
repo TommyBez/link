@@ -1,7 +1,7 @@
 'use client'
 
 import type { HTMLAttributes } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -17,7 +17,7 @@ type SignaturePadProps = {
   required?: boolean
   acknowledgementText?: string
   disabled?: boolean
-} & Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'children'>
+} & Omit<HTMLAttributes<HTMLFieldSetElement>, 'onChange' | 'children'>
 
 export function SignaturePad({
   value,
@@ -30,7 +30,6 @@ export function SignaturePad({
   ...interactiveProps
 }: SignaturePadProps) {
   const canvasRef = useRef<SignatureCanvas | null>(null)
-  const [isFocused, setIsFocused] = useState(false)
 
   const syncCanvasWithValue = useCallback(() => {
     const canvas = canvasRef.current
@@ -79,21 +78,16 @@ export function SignaturePad({
     })
   }, [disabled, onChange])
 
-  const resolvedTabIndex = typeof tabIndex === 'number' ? tabIndex : 0
-
   return (
     <div className={cn('space-y-3', className)}>
-      <div
+      <fieldset
         aria-label="Firma con il dito o il mouse"
         className={cn(
           'rounded-lg border bg-muted/40 p-3 transition-[border-color,box-shadow]',
-          isFocused ? 'border-primary shadow-sm' : 'border-border',
-          disabled ? 'opacity-70' : null,
+          'focus-within:border-primary focus-within:shadow-sm',
+          disabled ? 'opacity-70' : 'border-border',
         )}
-        onBlur={() => setIsFocused(false)}
-        onFocus={() => setIsFocused(true)}
-        role="group"
-        tabIndex={resolvedTabIndex}
+        disabled={disabled}
         {...interactiveProps}
       >
         <SignatureCanvas
@@ -102,6 +96,7 @@ export function SignaturePad({
             style: {
               pointerEvents: disabled ? 'none' : 'auto',
             },
+            tabIndex: typeof tabIndex === 'number' ? tabIndex : 0,
           }}
           maxWidth={2.8}
           minWidth={0.8}
@@ -110,7 +105,7 @@ export function SignaturePad({
           ref={canvasRef}
           throttle={16}
         />
-      </div>
+      </fieldset>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="text-muted-foreground text-xs">
           Firma con il dito o il mouse. Usa il pulsante per cancellare.
