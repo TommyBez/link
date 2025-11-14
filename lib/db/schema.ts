@@ -169,6 +169,9 @@ export const submissions = pgTable(
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
   },
   (table) => [
+    uniqueIndex('submissions_intake_session_id_unique').on(
+      table.intakeSessionId,
+    ),
     index('submissions_intake_session_id_idx').on(table.intakeSessionId),
     index('submissions_org_id_idx').on(table.orgId),
     index('submissions_status_idx').on(table.status),
