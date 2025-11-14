@@ -202,16 +202,18 @@ export function DynamicForm({
         <div className="space-y-6">
           {schema.fields.map((field) => {
             if (field.type === 'content') {
+              let alignClass: string
+              if (field.align === 'center') {
+                alignClass = 'text-center'
+              } else if (field.align === 'end') {
+                alignClass = 'text-right'
+              } else {
+                alignClass = 'text-left'
+              }
+
               return (
                 <div
-                  className={cn(
-                    fieldContainerClass,
-                    field.align === 'center'
-                      ? 'text-center'
-                      : field.align === 'end'
-                        ? 'text-right'
-                        : 'text-left',
-                  )}
+                  className={cn(fieldContainerClass, alignClass)}
                   key={field.id}
                   style={fieldContainerStyle}
                 >
@@ -276,6 +278,53 @@ export function DynamicForm({
   )
 }
 
+function validatePhoneField(
+  value: unknown,
+  pattern: RegExp,
+  required: boolean,
+): true | string {
+  if (typeof value !== 'string' || value.length === 0) {
+    return required ? 'Questo campo è obbligatorio.' : true
+  }
+  const trimmed = value.trim()
+  return pattern.test(trimmed)
+    ? true
+    : 'Inserisci un numero di telefono nel formato corretto.'
+}
+
+function validateDateField(
+  value: unknown,
+  field: Extract<FieldInput, { type: 'date' }>,
+): true | string {
+  if (!value || typeof value !== 'string') {
+    return field.required ? 'Questo campo è obbligatorio.' : true
+  }
+  const timestamp = Date.parse(value)
+  if (Number.isNaN(timestamp)) {
+    return 'Inserisci una data valida.'
+  }
+  if (field.min && value < field.min) {
+    return `La data deve essere successiva o uguale al ${field.min}.`
+  }
+  if (field.max && value > field.max) {
+    return `La data deve essere precedente o uguale al ${field.max}.`
+  }
+  return true
+}
+
+function validateSignatureField(
+  value: unknown,
+  required: boolean,
+): true | string {
+  if (!required) {
+    return true
+  }
+  const signature = value as SignatureValue | null
+  return signature?.dataUrl
+    ? true
+    : 'È necessario fornire una firma per continuare.'
+}
+
 function buildFieldRules(field: FieldInput) {
   const rules: Record<string, unknown> = {}
 
@@ -297,47 +346,18 @@ function buildFieldRules(field: FieldInput) {
   if (field.type === 'phone') {
     const pattern = getPhonePattern(field)
     if (pattern) {
-      rules.validate = (value: unknown) => {
-        if (typeof value !== 'string' || value.length === 0) {
-          return field.required ? 'Questo campo è obbligatorio.' : true
-        }
-        const trimmed = value.trim()
-        return pattern.test(trimmed)
-          ? true
-          : 'Inserisci un numero di telefono nel formato corretto.'
-      }
+      rules.validate = (value: unknown) =>
+        validatePhoneField(value, pattern, field.required)
     }
   }
 
   if (field.type === 'date') {
-    rules.validate = (value: unknown) => {
-      if (!value || typeof value !== 'string') {
-        return field.required ? 'Questo campo è obbligatorio.' : true
-      }
-      const timestamp = Date.parse(value)
-      if (Number.isNaN(timestamp)) {
-        return 'Inserisci una data valida.'
-      }
-      if (field.min && value < field.min) {
-        return `La data deve essere successiva o uguale al ${field.min}.`
-      }
-      if (field.max && value > field.max) {
-        return `La data deve essere precedente o uguale al ${field.max}.`
-      }
-      return true
-    }
+    rules.validate = (value: unknown) => validateDateField(value, field)
   }
 
   if (field.type === 'signature') {
-    rules.validate = (value: unknown) => {
-      if (!field.required) {
-        return true
-      }
-      const signature = value as SignatureValue | null
-      return signature?.dataUrl
-        ? true
-        : 'È necessario fornire una firma per continuare.'
-    }
+    rules.validate = (value: unknown) =>
+      validateSignatureField(value, field.required)
   }
 
   if (field.type === 'checkbox' && field.required) {
@@ -346,6 +366,34 @@ function buildFieldRules(field: FieldInput) {
   }
 
   return rules
+}
+
+function getInputType(fieldType: 'text' | 'email' | 'phone' | 'date'): string {
+  switch (fieldType) {
+    case 'text':
+      return 'text'
+    case 'email':
+      return 'email'
+    case 'date':
+      return 'date'
+    case 'phone':
+      return 'tel'
+    default:
+      return 'text'
+  }
+}
+
+function getInputMode(
+  fieldType: 'text' | 'email' | 'phone' | 'date',
+): 'tel' | 'email' | undefined {
+  switch (fieldType) {
+    case 'phone':
+      return 'tel'
+    case 'email':
+      return 'email'
+    default:
+      return
+  }
 }
 
 function renderFieldControl({
@@ -379,20 +427,8 @@ function renderFieldControl({
     case 'email':
     case 'phone':
     case 'date': {
-      const inputType =
-        field.type === 'text'
-          ? 'text'
-          : field.type === 'email'
-            ? 'email'
-            : field.type === 'date'
-              ? 'date'
-              : 'tel'
-      const inputMode =
-        field.type === 'phone'
-          ? 'tel'
-          : field.type === 'email'
-            ? 'email'
-            : undefined
+      const inputType = getInputType(field.type)
+      const inputMode = getInputMode(field.type)
       const maxLength = field.type === 'text' ? field.maxLength : undefined
       return (
         <Input
