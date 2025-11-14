@@ -5,7 +5,6 @@ import { intakeSessions, signatures, submissions } from '@/lib/db/schema'
 import { putSignature } from '@/lib/storage/blob'
 import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
 
-// Regex for parsing data URLs - defined at top level for performance
 const DATA_URL_REGEX = /^data:([^;]+);base64,(.+)$/u
 
 type SubmissionPayload = {
@@ -74,10 +73,8 @@ function sanitizeFieldValue(field: FieldInput, value: unknown): unknown {
       return valid ? trimmed : ''
     }
     case 'signature': {
-      // Store minimal metadata instead of full dataUrl
-      // The actual signature will be stored in the signatures table/blob storage
       if (isRecord(value) && typeof value.dataUrl === 'string') {
-        return true // Minimal metadata: just indicate signature is present
+        return true
       }
       return null
     }
@@ -156,8 +153,7 @@ function extractDataUrl(dataUrl: string): {
   buffer: Buffer
   contentType: string
 } {
-  // Enforce max size: 2MB for the entire dataUrl string (before decoding)
-  const MAX_DATAURL_SIZE = 2 * 1024 * 1024 // 2MB
+  const MAX_DATAURL_SIZE = 2 * 1024 * 1024
   if (dataUrl.length > MAX_DATAURL_SIZE) {
     throw new Error('La firma è troppo grande. Dimensione massima: 2MB.')
   }
@@ -176,7 +172,6 @@ function extractDataUrl(dataUrl: string): {
   }
   const buffer = Buffer.from(encoded, 'base64')
 
-  // Validate PNG magic bytes: 0x89 0x50 0x4E 0x47
   if (
     buffer.length < 4 ||
     buffer[0] !== 0x89 ||
@@ -412,7 +407,6 @@ async function createSubmissionInTransaction(
     signatureFile,
     request,
   } = params
-  // Re-check session status inside transaction to prevent race conditions
   const [lockedSession] = await tx
     .select()
     .from(intakeSessions)
@@ -427,7 +421,6 @@ async function createSubmissionInTransaction(
     throw new Error('CONFLICT: Questa sessione è già stata completata.')
   }
 
-  // Insert submission - unique constraint on intakeSessionId will prevent duplicates
   let submission: { id: string } | undefined
   try {
     const [inserted] = await tx
@@ -446,7 +439,6 @@ async function createSubmissionInTransaction(
       .returning({ id: submissions.id })
     submission = inserted
   } catch (error) {
-    // Handle unique constraint violation (duplicate submission)
     if (
       error instanceof Error &&
       (error.message.includes('unique') ||
@@ -480,7 +472,6 @@ async function createSubmissionInTransaction(
     })
   }
 
-  // Update session status inside the same transaction
   await tx
     .update(intakeSessions)
     .set({ status: 'completed' })
@@ -563,7 +554,6 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error(error)
-    // Handle conflict errors (duplicate submission or already completed session)
     if (error instanceof Error && error.message.includes('CONFLICT:')) {
       return NextResponse.json(
         { error: 'Questa sessione è già stata completata.' },

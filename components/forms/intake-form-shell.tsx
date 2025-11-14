@@ -107,7 +107,7 @@ export function IntakeFormShell({
               message = errorBody.error
             }
           } catch {
-            // ignore JSON parsing errors and use default message
+            // Use default message
           }
           throw new Error(message)
         }

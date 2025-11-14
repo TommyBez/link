@@ -123,7 +123,6 @@ export function DynamicForm({
     defaultValues,
   })
 
-  // keep default values in sync when prefill or restored values change
   useEffect(() => {
     form.reset(defaultValues)
   }, [defaultValues, form])
@@ -185,7 +184,7 @@ export function DynamicForm({
   )
   const fieldContainerClass = cn(
     'space-y-2 rounded-lg border bg-background/80 p-4',
-    accentBorder ? 'border-border' : 'border-border',
+    'border-border',
   )
 
   return (
