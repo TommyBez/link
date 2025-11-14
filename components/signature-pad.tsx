@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 
 export type SignatureValue = {
   dataUrl: string
-  signedAtClientUtc?: string
 }
 
 type SignaturePadProps = {
@@ -74,7 +73,6 @@ export function SignaturePad({
     const dataUrl = trimmed.toDataURL('image/png')
     onChange({
       dataUrl,
-      signedAtClientUtc: new Date().toISOString(),
     })
   }, [disabled, onChange])
 

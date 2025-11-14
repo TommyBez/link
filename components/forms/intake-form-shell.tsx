@@ -86,6 +86,38 @@ export function IntakeFormShell({
       setIsSubmitting(true)
       setSubmitError(null)
 
+      const extractErrorMessage = async (
+        response: Response,
+      ): Promise<string> => {
+        let message = 'Impossibile inviare il modulo. Riprova.'
+        try {
+          const errorBody = (await response.json()) as { error?: string }
+          if (errorBody?.error) {
+            message = errorBody.error
+          }
+        } catch (error) {
+          console.error(error)
+        }
+        return message
+      }
+
+      const handleSubmissionSuccess = (id: string) => {
+        clearProgress()
+        setSubmissionId(id)
+        setIsCompleted(true)
+        toast.success('Modulo inviato con successo.')
+        router.refresh()
+      }
+
+      const handleSubmissionError = (error: unknown) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Impossibile inviare il modulo. Riprova.'
+        setSubmitError(message)
+        toast.error(message)
+      }
+
       try {
         const response = await fetch('/api/submissions', {
           method: 'POST',
@@ -100,31 +132,14 @@ export function IntakeFormShell({
         })
 
         if (!response.ok) {
-          let message = 'Impossibile inviare il modulo. Riprova.'
-          try {
-            const errorBody = (await response.json()) as { error?: string }
-            if (errorBody?.error) {
-              message = errorBody.error
-            }
-          } catch {
-            // Use default message
-          }
+          const message = await extractErrorMessage(response)
           throw new Error(message)
         }
 
         const body = (await response.json()) as { submissionId: string }
-        clearProgress()
-        setSubmissionId(body.submissionId)
-        setIsCompleted(true)
-        toast.success('Modulo inviato con successo.')
-        router.refresh()
+        handleSubmissionSuccess(body.submissionId)
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : 'Impossibile inviare il modulo. Riprova.'
-        setSubmitError(message)
-        toast.error(message)
+        handleSubmissionError(error)
       } finally {
         setIsSubmitting(false)
       }

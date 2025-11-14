@@ -16,7 +16,6 @@ type SubmissionPayload = {
 type SignaturePayload = {
   dataUrl: string
   signerName?: string
-  signedAtClientUtc?: string
 }
 
 function isExpired(expiresAt: Date | null | undefined): boolean {
@@ -138,14 +137,9 @@ function parseSignaturePayload(input: unknown): SignaturePayload | null {
   }
   const signerName =
     typeof input.signerName === 'string' ? input.signerName.trim() : undefined
-  const signedAtClientUtc =
-    typeof input.signedAtClientUtc === 'string'
-      ? input.signedAtClientUtc
-      : undefined
   return {
     dataUrl,
     signerName,
-    signedAtClientUtc,
   }
 }
 
@@ -448,10 +442,6 @@ async function createSubmissionInTransaction(
       throw new Error('CONFLICT: Questa sessione è già stata completata.')
     }
     throw error
-  }
-
-  if (!submission) {
-    throw new Error('Impossibile creare la sottomissione.')
   }
 
   if (signaturePayload && signatureFile) {
