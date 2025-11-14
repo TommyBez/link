@@ -86,12 +86,12 @@ IMPORTANT: As you complete each task, you must check it off in this markdown fil
   - [x] 4.3 Implement `GET /api/intakes/[token]` to load template version & intake status
   - [x] 4.4 Support prefill mapping from query params to schema fields
   - [x] 4.5 Show pending vs completed status for intakes in staff UI
-- [ ] 5.0 Client intake form & signature capture (mobile-first, autosave, accessibility)
-  - [ ] 5.1 Implement client form at `app/(client)/intake/[token]/page.tsx` rendering fields from schema
-  - [ ] 5.2 Create `components/signature-pad.tsx` to capture signature image + metadata (UTC, IP, user agent)
-  - [ ] 5.3 Add autosave at step boundaries using `hooks/use-local-progress.ts`
-  - [ ] 5.4 Validate required fields and ensure accessibility (labels, aria, keyboard)
-  - [ ] 5.5 Implement `POST /api/submissions` to persist responses and signature reference
+- [x] 5.0 Client intake form & signature capture (mobile-first, autosave, accessibility)
+  - [x] 5.1 Implement client form at `app/(client)/intake/[token]/page.tsx` rendering fields from schema
+  - [x] 5.2 Create `components/signature-pad.tsx` to capture signature image + metadata (UTC, IP, user agent)
+  - [x] 5.3 Add autosave at step boundaries using `hooks/use-local-progress.ts`
+  - [x] 5.4 Validate required fields and ensure accessibility (labels, aria, keyboard)
+  - [x] 5.5 Implement `POST /api/submissions` to persist responses and signature reference
 - [ ] 6.0 PDF generation & storage pipeline (react-pdf, audit page, async status)
   - [ ] 6.1 Create `lib/pdf/document.tsx` using React-pdf, including audit trail page
   - [ ] 6.2 Implement `POST /api/pdf/[submissionId]/generate` to render and store PDF in blob
