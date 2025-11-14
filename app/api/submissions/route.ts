@@ -1,9 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server'
 import { eq } from 'drizzle-orm'
+import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { intakeSessions, signatures, submissions } from '@/lib/db/schema'
-import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
 import { putSignature } from '@/lib/storage/blob'
+import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
 
 type SubmissionPayload = {
   token?: unknown
@@ -149,13 +149,16 @@ function parseSignaturePayload(input: unknown): SignaturePayload | null {
   }
 }
 
-function extractDataUrl(dataUrl: string): { buffer: Buffer; contentType: string } {
+function extractDataUrl(dataUrl: string): {
+  buffer: Buffer
+  contentType: string
+} {
   const matches = dataUrl.match(/^data:([^;]+);base64,(.+)$/u)
   if (!matches) {
     throw new Error('Formato della firma non valido.')
   }
   const [, mime, encoded] = matches
-  if (!mime || !encoded) {
+  if (!(mime && encoded)) {
     throw new Error('Formato della firma non valido.')
   }
   const contentType = mime
@@ -243,7 +246,8 @@ export async function POST(request: NextRequest) {
     const signaturePayload = parseSignaturePayload(payload.signature ?? null)
 
     const session = await db.query.intakeSessions.findFirst({
-      where: (sessionTable, { eq: equals }) => equals(sessionTable.token, token),
+      where: (sessionTable, { eq: equals }) =>
+        equals(sessionTable.token, token),
       with: {
         templateVersion: {
           with: {
@@ -317,7 +321,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const respondentName = inferRespondentName(schema.fields, sanitizedResponses)
+    const respondentName = inferRespondentName(
+      schema.fields,
+      sanitizedResponses,
+    )
     const respondentEmail = inferEmail(schema.fields, sanitizedResponses)
     const respondentPhone = inferPhone(schema.fields, sanitizedResponses)
 
@@ -337,31 +344,31 @@ export async function POST(request: NextRequest) {
         })
         .returning({ id: submissions.id })
 
-        if (!submission) {
-          throw new Error('Impossibile creare la sottomissione.')
-        }
+      if (!submission) {
+        throw new Error('Impossibile creare la sottomissione.')
+      }
 
-        let blobUrl: string | null = null
-        let signerName: string | undefined = signaturePayload?.signerName
-        if (signaturePayload && signatureFile) {
-          const uploadResult = await putSignature(
-            `${submission.id}.png`,
-            signatureFile.buffer,
-            signatureFile.contentType,
-          )
-          blobUrl = uploadResult.url
-          if (!signerName) {
-            signerName = respondentName ?? 'Firmatario'
-          }
-          await tx.insert(signatures).values({
-            submissionId: submission.id,
-            signerName: signerName ?? 'Firmatario',
-            signedAtUtc: new Date(),
-            ipAddress: extractClientIp(request),
-            userAgent: request.headers.get('user-agent'),
-            blobUrl,
-          })
+      let blobUrl: string | null = null
+      let signerName: string | undefined = signaturePayload?.signerName
+      if (signaturePayload && signatureFile) {
+        const uploadResult = await putSignature(
+          `${submission.id}.png`,
+          signatureFile.buffer,
+          signatureFile.contentType,
+        )
+        blobUrl = uploadResult.url
+        if (!signerName) {
+          signerName = respondentName ?? 'Firmatario'
         }
+        await tx.insert(signatures).values({
+          submissionId: submission.id,
+          signerName: signerName ?? 'Firmatario',
+          signedAtUtc: new Date(),
+          ipAddress: extractClientIp(request),
+          userAgent: request.headers.get('user-agent'),
+          blobUrl,
+        })
+      }
 
       await tx
         .update(intakeSessions)

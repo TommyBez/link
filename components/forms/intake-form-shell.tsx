@@ -1,15 +1,15 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import type { TemplateDraftInput } from '@/lib/templates/schema'
 import { useLocalProgress } from '@/hooks/use-local-progress'
-import { DynamicForm } from './dynamic-form'
+import type { TemplateDraftInput } from '@/lib/templates/schema'
 import type { DynamicFormSubmitMeta } from './dynamic-form'
+import { DynamicForm } from './dynamic-form'
 
 type IntakeFormShellProps = {
   token: string
@@ -129,13 +129,7 @@ export function IntakeFormShell({
         setIsSubmitting(false)
       }
     },
-    [
-      clearProgress,
-      isCompleted,
-      isSubmitting,
-      router,
-      token,
-    ],
+    [clearProgress, isCompleted, isSubmitting, router, token],
   )
 
   if (!isHydrated) {
@@ -160,7 +154,7 @@ export function IntakeFormShell({
           </AlertDescription>
         </Alert>
         <Separator />
-        <Button onClick={() => router.refresh()} className="w-full">
+        <Button className="w-full" onClick={() => router.refresh()}>
           Aggiorna la pagina
         </Button>
       </div>
@@ -176,12 +170,12 @@ export function IntakeFormShell({
         </Alert>
       ) : null}
       <DynamicForm
-        schema={schema}
-        initialValues={currentValues}
-        onSubmit={handleSubmit}
-        onAutosave={handleAutosave}
-        isSubmitting={isSubmitting}
         branding={branding}
+        initialValues={currentValues}
+        isSubmitting={isSubmitting}
+        onAutosave={handleAutosave}
+        onSubmit={handleSubmit}
+        schema={schema}
       />
       <p className="text-muted-foreground text-sm">
         Le modifiche vengono salvate automaticamente su questo dispositivo.

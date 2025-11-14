@@ -1,10 +1,17 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, type CSSProperties } from 'react'
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { SignaturePad, type SignatureValue } from '@/components/signature-pad'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Form,
   FormControl,
@@ -15,7 +22,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Textarea } from '@/components/ui/textarea'
 import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
@@ -31,7 +37,10 @@ export type DynamicFormSubmitMeta = {
 type DynamicFormProps = {
   schema: TemplateDraftInput
   initialValues?: FormValues
-  onSubmit: (values: FormValues, meta: DynamicFormSubmitMeta) => Promise<void> | void
+  onSubmit: (
+    values: FormValues,
+    meta: DynamicFormSubmitMeta,
+  ) => Promise<void> | void
   onAutosave?: (values: FormValues) => void
   isSubmitting?: boolean
   branding?: TemplateDraftInput['branding'] | null
@@ -182,16 +191,15 @@ export function DynamicForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit, handleInvalid)}
         className="space-y-8"
         noValidate
+        onSubmit={form.handleSubmit(handleSubmit, handleInvalid)}
       >
         <div className="space-y-6">
           {schema.fields.map((field) => {
             if (field.type === 'content') {
               return (
                 <div
-                  key={field.id}
                   className={cn(
                     fieldContainerClass,
                     field.align === 'center'
@@ -200,10 +208,11 @@ export function DynamicForm({
                         ? 'text-right'
                         : 'text-left',
                   )}
+                  key={field.id}
                   style={fieldContainerStyle}
                 >
                   <div className="font-medium text-base">{field.label}</div>
-                  <p className="text-muted-foreground whitespace-pre-line text-sm">
+                  <p className="whitespace-pre-line text-muted-foreground text-sm">
                     {field.content}
                   </p>
                 </div>
@@ -214,20 +223,22 @@ export function DynamicForm({
 
             return (
               <FormField
+                control={form.control}
                 key={field.id}
                 name={field.id}
-                control={form.control}
-                rules={fieldRules}
                 render={({ field: controller }) => (
-                  <FormItem className={fieldContainerClass} style={fieldContainerStyle}>
+                  <FormItem
+                    className={fieldContainerClass}
+                    style={fieldContainerStyle}
+                  >
                     <div className="space-y-1">
                       <FormLabel>
                         {field.label}
                         {field.required ? (
-                          <span className="text-destructive ml-1">*</span>
+                          <span className="ml-1 text-destructive">*</span>
                         ) : null}
                       </FormLabel>
-            {field.helperText && field.type !== 'checkbox' ? (
+                      {field.helperText && field.type !== 'checkbox' ? (
                         <FormDescription>{field.helperText}</FormDescription>
                       ) : null}
                     </div>
@@ -242,16 +253,17 @@ export function DynamicForm({
                     <FormMessage />
                   </FormItem>
                 )}
+                rules={fieldRules}
               />
             )
           })}
         </div>
 
         <Button
-          type="submit"
+          aria-busy={isSubmitting}
           className="w-full"
           disabled={isSubmitting}
-          aria-busy={isSubmitting}
+          type="submit"
         >
           {isSubmitting ? 'Invio in corso...' : 'Invia modulo'}
         </Button>
@@ -380,11 +392,11 @@ function renderFieldControl({
       const maxLength = field.type === 'text' ? field.maxLength : undefined
       return (
         <Input
-          type={inputType}
           inputMode={inputMode}
-          value={(controller.value as string) ?? ''}
-          onChange={(event) => controller.onChange(event.target.value)}
           maxLength={maxLength}
+          onChange={(event) => controller.onChange(event.target.value)}
+          type={inputType}
+          value={(controller.value as string) ?? ''}
           {...commonInputProps}
         />
       )
@@ -392,10 +404,10 @@ function renderFieldControl({
     case 'textarea': {
       return (
         <Textarea
-          value={(controller.value as string) ?? ''}
-          onChange={(event) => controller.onChange(event.target.value)}
           maxLength={field.maxLength}
+          onChange={(event) => controller.onChange(event.target.value)}
           rows={4}
+          value={(controller.value as string) ?? ''}
           {...commonInputProps}
         />
       )
@@ -404,10 +416,12 @@ function renderFieldControl({
       return (
         <div className="flex items-center gap-3">
           <Checkbox
-            checked={Boolean(controller.value)}
-            onCheckedChange={(nextValue) => controller.onChange(Boolean(nextValue))}
-            disabled={isSubmitting}
             aria-required={field.required}
+            checked={Boolean(controller.value)}
+            disabled={isSubmitting}
+            onCheckedChange={(nextValue) =>
+              controller.onChange(Boolean(nextValue))
+            }
           />
           <span className="text-muted-foreground text-sm">
             {field.helperText ?? 'Seleziona per confermare.'}
@@ -418,23 +432,23 @@ function renderFieldControl({
     case 'radio': {
       return (
         <RadioGroup
-          value={(controller.value as string) ?? ''}
-          onValueChange={controller.onChange}
           className="space-y-3"
+          onValueChange={controller.onChange}
+          value={(controller.value as string) ?? ''}
         >
           {field.options.map((option) => (
             <div
-              key={option.id}
               className="flex items-center gap-3 rounded-md border border-input bg-background/70 p-3"
+              key={option.id}
             >
               <RadioGroupItem
-                value={option.id}
-                id={`${field.id}-${option.id}`}
                 disabled={isSubmitting}
+                id={`${field.id}-${option.id}`}
+                value={option.id}
               />
               <label
-                htmlFor={`${field.id}-${option.id}`}
                 className="text-muted-foreground text-sm leading-tight"
+                htmlFor={`${field.id}-${option.id}`}
               >
                 {option.label}
               </label>
@@ -446,16 +460,16 @@ function renderFieldControl({
     case 'signature': {
       return (
         <SignaturePad
-          value={(controller.value as SignatureValue | null) ?? null}
-          onChange={controller.onChange}
-          required={field.required}
           acknowledgementText={field.acknowledgementText}
           disabled={isSubmitting}
+          onChange={controller.onChange}
+          required={field.required}
           style={
             branding?.accentColor
               ? { borderColor: branding.accentColor }
               : undefined
           }
+          value={(controller.value as SignatureValue | null) ?? null}
         />
       )
     }

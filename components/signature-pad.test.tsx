@@ -57,23 +57,21 @@ describe('SignaturePad', () => {
   it('renders acknowledgement text and instructions', () => {
     render(
       <SignaturePad
-        value={null}
-        onChange={jest.fn()}
         acknowledgementText="Accetto le condizioni"
+        onChange={jest.fn()}
+        value={null}
       />,
     )
 
     expect(
       screen.getByText(/Firma con il dito o il mouse/i),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText('Accetto le condizioni'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Accetto le condizioni')).toBeInTheDocument()
   })
 
   it('calls onChange with signature payload after drawing', () => {
     const handleChange = jest.fn()
-    render(<SignaturePad value={null} onChange={handleChange} required />)
+    render(<SignaturePad onChange={handleChange} required value={null} />)
 
     const instance = SignatureCanvasMock.__getLastInstance()
     instance.methods.isEmpty.mockReturnValue(false)
@@ -94,7 +92,7 @@ describe('SignaturePad', () => {
 
   it('clears the canvas and resets the value', () => {
     const handleChange = jest.fn()
-    render(<SignaturePad value={{ dataUrl: 'x' }} onChange={handleChange} />)
+    render(<SignaturePad onChange={handleChange} value={{ dataUrl: 'x' }} />)
 
     const instance = SignatureCanvasMock.__getLastInstance()
     fireEvent.click(screen.getByRole('button', { name: /cancella firma/i }))

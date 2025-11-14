@@ -1,11 +1,10 @@
 'use client'
 
+import type { HTMLAttributes } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-import type { HTMLAttributes } from 'react'
 
 export type SignatureValue = {
   dataUrl: string
@@ -85,31 +84,31 @@ export function SignaturePad({
   return (
     <div className={cn('space-y-3', className)}>
       <div
+        aria-label="Firma con il dito o il mouse"
         className={cn(
           'rounded-lg border bg-muted/40 p-3 transition-[border-color,box-shadow]',
           isFocused ? 'border-primary shadow-sm' : 'border-border',
           disabled ? 'opacity-70' : null,
         )}
-        role="group"
-        aria-label="Firma con il dito o il mouse"
-        tabIndex={resolvedTabIndex}
-        onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        onFocus={() => setIsFocused(true)}
+        role="group"
+        tabIndex={resolvedTabIndex}
         {...interactiveProps}
       >
         <SignatureCanvas
-          ref={canvasRef}
-          penColor="#111827"
-          minWidth={0.8}
-          maxWidth={2.8}
-          throttle={16}
-          onEnd={handleEnd}
           canvasProps={{
             className: 'h-48 w-full bg-background',
             style: {
               pointerEvents: disabled ? 'none' : 'auto',
             },
           }}
+          maxWidth={2.8}
+          minWidth={0.8}
+          onEnd={handleEnd}
+          penColor="#111827"
+          ref={canvasRef}
+          throttle={16}
         />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -118,18 +117,18 @@ export function SignaturePad({
           {required ? ' Campo obbligatorio.' : ''}
         </span>
         <Button
+          aria-label="Cancella firma"
+          disabled={disabled}
+          onClick={handleClear}
+          size="sm"
           type="button"
           variant="outline"
-          size="sm"
-          onClick={handleClear}
-          disabled={disabled}
-          aria-label="Cancella firma"
         >
           Cancella firma
         </Button>
       </div>
       {acknowledgementText ? (
-        <p className="rounded-md bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
+        <p className="rounded-md bg-muted/60 px-3 py-2 text-muted-foreground text-sm">
           {acknowledgementText}
         </p>
       ) : null}

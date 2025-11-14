@@ -29,7 +29,7 @@ function shouldDiscardStoredMeta(
   storedMeta: Record<string, unknown> | undefined,
   currentMeta: Record<string, unknown> | undefined,
 ): boolean {
-  if (!storedMeta || !currentMeta) {
+  if (!(storedMeta && currentMeta)) {
     return false
   }
   const versionKey = 'templateVersionId'
@@ -48,11 +48,14 @@ export function useLocalProgress({
   initialValues,
   schemaMeta,
 }: LocalProgressArgs): LocalProgressResult {
-  const [restoredValues, setRestoredValues] = useState<Record<string, unknown> | null>(
-    null,
-  )
+  const [restoredValues, setRestoredValues] = useState<Record<
+    string,
+    unknown
+  > | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
-  const latestValuesRef = useRef<Record<string, unknown> | null>(initialValues ?? null)
+  const latestValuesRef = useRef<Record<string, unknown> | null>(
+    initialValues ?? null,
+  )
 
   const baseValues = useMemo(
     () => ({ ...(initialValues ?? {}) }),
@@ -73,8 +76,7 @@ export function useLocalProgress({
       }
       const parsed = JSON.parse(raw) as StoredProgress
       if (
-        !isRecord(parsed) ||
-        !isRecord(parsed.values) ||
+        !(isRecord(parsed) && isRecord(parsed.values)) ||
         shouldDiscardStoredMeta(
           isRecord(parsed.meta) ? parsed.meta : undefined,
           schemaMeta,

@@ -108,11 +108,9 @@ beforeEach(() => {
 
 describe('POST /api/submissions', () => {
   it('creates a submission and uploads the signature', async () => {
-    const insertValuesMock = jest
-      .fn()
-      .mockReturnValue({
-        returning: jest.fn().mockResolvedValue([{ id: 'submission-123' }]),
-      })
+    const insertValuesMock = jest.fn().mockReturnValue({
+      returning: jest.fn().mockResolvedValue([{ id: 'submission-123' }]),
+    })
     const insertSignatureMock = jest.fn().mockResolvedValue(undefined)
     const updateWhereMock = jest.fn().mockResolvedValue(undefined)
 
@@ -196,7 +194,11 @@ describe('POST /api/submissions', () => {
     expect(response.status).toBe(400)
     expect(body).toMatchObject({
       error: 'Compila tutti i campi obbligatori.',
-      missing: expect.arrayContaining(['Nome completo', 'Consenso privacy', 'Firma']),
+      missing: expect.arrayContaining([
+        'Nome completo',
+        'Consenso privacy',
+        'Firma',
+      ]),
     })
     expect(mockedDb.transaction).not.toHaveBeenCalled()
   })

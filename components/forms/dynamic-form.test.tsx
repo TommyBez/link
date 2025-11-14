@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { DynamicForm } from './dynamic-form'
 import type { TemplateDraftInput } from '@/lib/templates/schema'
+import { DynamicForm } from './dynamic-form'
 
 jest.mock('sonner', () => ({
   toast: {
@@ -12,13 +12,13 @@ jest.mock('sonner', () => ({
 jest.mock('@/components/signature-pad', () => ({
   SignaturePad: ({ onChange }: { onChange: (value: unknown) => void }) => (
     <button
-      type="button"
       onClick={() =>
         onChange({
           dataUrl: 'data:image/png;base64,fake-signature',
           signedAtClientUtc: '2024-01-01T00:00:00.000Z',
         })
       }
+      type="button"
     >
       Firma
     </button>
@@ -51,7 +51,11 @@ describe('DynamicForm', () => {
   it('mostra i messaggi di errore per i campi obbligatori', async () => {
     const handleSubmit = jest.fn()
     render(
-      <DynamicForm schema={schema} onSubmit={handleSubmit} initialValues={{}} />,
+      <DynamicForm
+        initialValues={{}}
+        onSubmit={handleSubmit}
+        schema={schema}
+      />,
     )
 
     fireEvent.click(screen.getByRole('button', { name: /invia modulo/i }))
@@ -64,7 +68,11 @@ describe('DynamicForm', () => {
   it('invia i valori della form inclusa la firma', async () => {
     const handleSubmit = jest.fn()
     render(
-      <DynamicForm schema={schema} onSubmit={handleSubmit} initialValues={{}} />,
+      <DynamicForm
+        initialValues={{}}
+        onSubmit={handleSubmit}
+        schema={schema}
+      />,
     )
 
     const nameInput = screen.getByLabelText(/Nome completo/i)
