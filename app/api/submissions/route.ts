@@ -5,6 +5,9 @@ import { intakeSessions, signatures, submissions } from '@/lib/db/schema'
 import { putSignature } from '@/lib/storage/blob'
 import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
 
+// Regex for parsing data URLs - defined at top level for performance
+const DATA_URL_REGEX = /^data:([^;]+);base64,(.+)$/u
+
 type SubmissionPayload = {
   token?: unknown
   responses?: unknown
@@ -71,8 +74,10 @@ function sanitizeFieldValue(field: FieldInput, value: unknown): unknown {
       return valid ? trimmed : ''
     }
     case 'signature': {
+      // Store minimal metadata instead of full dataUrl
+      // The actual signature will be stored in the signatures table/blob storage
       if (isRecord(value) && typeof value.dataUrl === 'string') {
-        return value
+        return true // Minimal metadata: just indicate signature is present
       }
       return null
     }
@@ -153,7 +158,13 @@ function extractDataUrl(dataUrl: string): {
   buffer: Buffer
   contentType: string
 } {
-  const matches = dataUrl.match(/^data:([^;]+);base64,(.+)$/u)
+  // Enforce max size: 2MB for the entire dataUrl string (before decoding)
+  const MAX_DATAURL_SIZE = 2 * 1024 * 1024 // 2MB
+  if (dataUrl.length > MAX_DATAURL_SIZE) {
+    throw new Error('La firma è troppo grande. Dimensione massima: 2MB.')
+  }
+
+  const matches = dataUrl.match(DATA_URL_REGEX)
   if (!matches) {
     throw new Error('Formato della firma non valido.')
   }
@@ -166,6 +177,18 @@ function extractDataUrl(dataUrl: string): {
     throw new Error('La firma deve essere in formato PNG.')
   }
   const buffer = Buffer.from(encoded, 'base64')
+
+  // Validate PNG magic bytes: 0x89 0x50 0x4E 0x47
+  if (
+    buffer.length < 4 ||
+    buffer[0] !== 0x89 ||
+    buffer[1] !== 0x50 ||
+    buffer[2] !== 0x4e ||
+    buffer[3] !== 0x47
+  ) {
+    throw new Error('Il file non è un PNG valido.')
+  }
+
   return { buffer, contentType }
 }
 
@@ -245,6 +268,7 @@ export async function POST(request: NextRequest) {
 
     const signaturePayload = parseSignaturePayload(payload.signature ?? null)
 
+    // Fetch session outside transaction for initial validation
     const session = await db.query.intakeSessions.findFirst({
       where: (sessionTable, { eq: equals }) =>
         equals(sessionTable.token, token),
@@ -264,13 +288,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (session.status === 'completed') {
-      return NextResponse.json(
-        { error: 'Questa sessione è già stata completata.' },
-        { status: 409 },
-      )
-    }
-
+    // Check expiration outside transaction (doesn't need DB-level consistency)
     if (isExpired(session.expiresAt)) {
       return NextResponse.json(
         {
@@ -329,20 +347,51 @@ export async function POST(request: NextRequest) {
     const respondentPhone = inferPhone(schema.fields, sanitizedResponses)
 
     const submissionId = await db.transaction(async (tx) => {
-      const [submission] = await tx
-        .insert(submissions)
-        .values({
-          intakeSessionId: session.id,
-          templateVersionId: session.templateVersionId,
-          orgId: session.orgId,
-          status: 'submitted',
-          submittedAt: new Date(),
-          responseData: sanitizedResponses,
-          respondentName,
-          respondentEmail,
-          respondentPhone,
-        })
-        .returning({ id: submissions.id })
+      // Re-check session status inside transaction to prevent race conditions
+      const [lockedSession] = await tx
+        .select()
+        .from(intakeSessions)
+        .where(eq(intakeSessions.id, session.id))
+        .limit(1)
+
+      if (!lockedSession) {
+        throw new Error('Sessione di intake non trovata.')
+      }
+
+      if (lockedSession.status === 'completed') {
+        throw new Error('CONFLICT: Questa sessione è già stata completata.')
+      }
+
+      // Insert submission - unique constraint on intakeSessionId will prevent duplicates
+      let submission: { id: string } | undefined
+      try {
+        const [inserted] = await tx
+          .insert(submissions)
+          .values({
+            intakeSessionId: session.id,
+            templateVersionId: session.templateVersionId,
+            orgId: session.orgId,
+            status: 'submitted',
+            submittedAt: new Date(),
+            responseData: sanitizedResponses,
+            respondentName,
+            respondentEmail,
+            respondentPhone,
+          })
+          .returning({ id: submissions.id })
+        submission = inserted
+      } catch (error) {
+        // Handle unique constraint violation (duplicate submission)
+        if (
+          error instanceof Error &&
+          (error.message.includes('unique') ||
+            error.message.includes('duplicate') ||
+            error.message.includes('violates unique constraint'))
+        ) {
+          throw new Error('CONFLICT: Questa sessione è già stata completata.')
+        }
+        throw error
+      }
 
       if (!submission) {
         throw new Error('Impossibile creare la sottomissione.')
@@ -370,6 +419,7 @@ export async function POST(request: NextRequest) {
         })
       }
 
+      // Update session status inside the same transaction
       await tx
         .update(intakeSessions)
         .set({ status: 'completed' })
@@ -387,6 +437,13 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error(error)
+    // Handle conflict errors (duplicate submission or already completed session)
+    if (error instanceof Error && error.message.includes('CONFLICT:')) {
+      return NextResponse.json(
+        { error: 'Questa sessione è già stata completata.' },
+        { status: 409 },
+      )
+    }
     return NextResponse.json(
       { error: 'Impossibile registrare la sottomissione.' },
       { status: 500 },
