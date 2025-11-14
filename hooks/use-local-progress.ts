@@ -93,9 +93,6 @@ export function useLocalProgress({
     unknown
   > | null>(null)
   const [isHydrated, setIsHydrated] = useState(false)
-  const latestValuesRef = useRef<Record<string, unknown> | null>(
-    initialValues ?? null,
-  )
 
   const baseValues = useMemo(
     () => ({ ...(initialValues ?? {}) }),
@@ -130,7 +127,6 @@ export function useLocalProgress({
     previousStorageKeyRef.current = storageKey
 
     const restored = restoreFromStorage(storageKey, baseValues, schemaMeta)
-    latestValuesRef.current = restored
     setRestoredValues(restored)
     setIsHydrated(true)
   }, [baseValues, schemaMeta, storageKey])
@@ -140,7 +136,6 @@ export function useLocalProgress({
       if (typeof window === 'undefined') {
         return
       }
-      latestValuesRef.current = values
       const payload: StoredProgress = {
         values,
         meta: schemaMeta,
@@ -161,7 +156,6 @@ export function useLocalProgress({
       return
     }
     window.localStorage.removeItem(storageKey)
-    latestValuesRef.current = initialValues ?? null
     setRestoredValues(initialValues ?? {})
   }, [initialValues, storageKey])
 
