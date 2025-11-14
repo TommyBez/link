@@ -136,8 +136,12 @@ function statusLabel(status: IntakeStatus): string {
   return 'In corso'
 }
 
-export default async function IntakePage({ params, searchParams }: PageParams) {
-  const { token } = params
+export default async function IntakePage({
+  params,
+  searchParams: searchParamsPromise,
+}: PageProps<'/intake/[token]'>) {
+  const { token } = await params
+  const searchParams = await searchParamsPromise
 
   const session = await db.query.intakeSessions.findFirst({
     where: (sessionTable, { eq }) => eq(sessionTable.token, token),
