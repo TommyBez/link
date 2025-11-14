@@ -14,7 +14,30 @@ import {
 
 export const roles = pgEnum('roles', ['ADMIN', 'STAFF'] as const)
 
+export const intakeSessionStatus = pgEnum('intake_session_status', [
+  'pending',
+  'completed',
+  'expired',
+] as const)
+
+export const submissionStatus = pgEnum('submission_status', [
+  'draft',
+  'submitted',
+  'processed',
+] as const)
+
+export const pdfArtifactStatus = pgEnum('pdf_artifact_status', [
+  'queued',
+  'generating',
+  'ready',
+  'failed',
+] as const)
+
 export type Role = (typeof roles.enumValues)[number]
+export type IntakeSessionStatus =
+  (typeof intakeSessionStatus.enumValues)[number]
+export type SubmissionStatus = (typeof submissionStatus.enumValues)[number]
+export type PdfArtifactStatus = (typeof pdfArtifactStatus.enumValues)[number]
 
 // Organizations table
 export const orgs = pgTable(
@@ -130,7 +153,7 @@ export const intakeSessions = pgTable(
     templateVersionId: uuid('template_version_id')
       .notNull()
       .references(() => templateVersions.id, { onDelete: 'restrict' }),
-    status: varchar('status', { length: 50 }).notNull().default('pending'), // 'pending' | 'completed' | 'expired'
+    status: intakeSessionStatus('status').notNull().default('pending'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
@@ -162,7 +185,7 @@ export const submissions = pgTable(
     respondentEmail: varchar('respondent_email', { length: 255 }),
     respondentPhone: varchar('respondent_phone', { length: 50 }),
     responseData: jsonb('response_data').notNull(),
-    status: varchar('status', { length: 50 }).notNull(), // 'draft' | 'submitted' | 'processed'
+    status: submissionStatus('status').notNull().default('draft'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -212,7 +235,7 @@ export const pdfArtifacts = pgTable(
       .unique()
       .references(() => submissions.id, { onDelete: 'cascade' }),
     blobUrl: text('blob_url'),
-    status: varchar('status', { length: 50 }).notNull(), // 'queued' | 'generating' | 'ready' | 'failed'
+    status: pdfArtifactStatus('status').notNull().default('queued'),
     sizeBytes: integer('size_bytes'),
     checksum: varchar('checksum', { length: 64 }),
     error: text('error'),
