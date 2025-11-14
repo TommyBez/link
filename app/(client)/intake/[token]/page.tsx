@@ -29,7 +29,9 @@ function isExpired(expiresAt: Date | null | undefined): boolean {
   return expiresAt.getTime() <= Date.now()
 }
 
-function formatDateTime(input: Date | string | null | undefined): string | null {
+function formatDateTime(
+  input: Date | string | null | undefined,
+): string | null {
   if (!input) {
     return null
   }
@@ -97,12 +99,12 @@ function getSessionStatus(
   sessionStatus: string,
   expired: boolean,
 ): IntakeStatus {
-  if (expired) {
-    return 'expired'
-  }
-
   if (sessionStatus === 'completed') {
     return 'completed'
+  }
+
+  if (expired) {
+    return 'expired'
   }
 
   return 'pending'
@@ -134,10 +136,7 @@ function statusLabel(status: IntakeStatus): string {
   return 'In corso'
 }
 
-export default async function IntakePage({
-  params,
-  searchParams,
-}: PageParams) {
+export default async function IntakePage({ params, searchParams }: PageParams) {
   const { token } = params
 
   const session = await db.query.intakeSessions.findFirst({
@@ -192,11 +191,11 @@ export default async function IntakePage({
           <div className="flex justify-center">
             <Image
               alt={`Logo di ${template.name}`}
+              className="h-12 w-auto"
+              height={80}
+              priority
               src={schema.branding.logoUrl}
               width={160}
-              height={80}
-              className="h-12 w-auto"
-              priority
             />
           </div>
         ) : null}
@@ -205,11 +204,15 @@ export default async function IntakePage({
             {template.name}
           </h1>
           {schema.description ? (
-            <p className="text-muted-foreground text-base">{schema.description}</p>
+            <p className="text-base text-muted-foreground">
+              {schema.description}
+            </p>
           ) : null}
         </div>
         <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-          <Badge variant={statusBadgeVariant(status)}>{statusLabel(status)}</Badge>
+          <Badge variant={statusBadgeVariant(status)}>
+            {statusLabel(status)}
+          </Badge>
           {formattedExpiry ? (
             <span className="text-muted-foreground">
               Scade il {formattedExpiry}
@@ -227,14 +230,14 @@ export default async function IntakePage({
         </CardHeader>
         <CardContent className="space-y-6">
           <IntakeFormShell
-            token={token}
-            status={status}
-            expiresAt={session.expiresAt.toISOString()}
-            templateVersionId={templateVersion.id}
-            templateTitle={template.name}
-            schema={schema}
             branding={schema.branding ?? null}
+            expiresAt={session.expiresAt.toISOString()}
             prefill={prefill}
+            schema={schema}
+            status={status}
+            templateTitle={template.name}
+            templateVersionId={templateVersion.id}
+            token={token}
           />
         </CardContent>
       </Card>
@@ -257,7 +260,7 @@ function renderErrorState({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardFooter className="grid">
-          <Button variant="secondary" asChild>
+          <Button asChild variant="secondary">
             <a href="mailto:supporto@link-platform.it">Contatta il supporto</a>
           </Button>
         </CardFooter>
@@ -279,7 +282,8 @@ function renderExpiredState({
         <CardHeader>
           <CardTitle>Sessione scaduta</CardTitle>
           <CardDescription>
-            La sessione per <strong>{templateTitle}</strong> non è più disponibile.
+            La sessione per <strong>{templateTitle}</strong> non è più
+            disponibile.
             {expiresAt ? ` È scaduta il ${expiresAt}.` : null}
           </CardDescription>
         </CardHeader>
@@ -293,8 +297,10 @@ function renderExpiredState({
           </Alert>
         </CardContent>
         <CardFooter className="grid">
-          <Button variant="secondary" asChild>
-            <a href="mailto:supporto@link-platform.it">Richiedi un nuovo link</a>
+          <Button asChild variant="secondary">
+            <a href="mailto:supporto@link-platform.it">
+              Richiedi un nuovo link
+            </a>
           </Button>
         </CardFooter>
       </Card>
@@ -302,19 +308,15 @@ function renderExpiredState({
   )
 }
 
-function renderCompletedState({
-  templateTitle,
-}: {
-  templateTitle: string
-}) {
+function renderCompletedState({ templateTitle }: { templateTitle: string }) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-4 py-12">
       <Card>
         <CardHeader>
           <CardTitle>Modulo già inviato</CardTitle>
           <CardDescription>
-            Hai già completato il modulo <strong>{templateTitle}</strong>. Grazie
-            per averci fornito tutte le informazioni necessarie.
+            Hai già completato il modulo <strong>{templateTitle}</strong>.
+            Grazie per averci fornito tutte le informazioni necessarie.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -327,7 +329,7 @@ function renderCompletedState({
           </Alert>
         </CardContent>
         <CardFooter className="grid">
-          <Button variant="secondary" asChild>
+          <Button asChild variant="secondary">
             <a href="mailto:supporto@link-platform.it">Contatta il supporto</a>
           </Button>
         </CardFooter>
