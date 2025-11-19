@@ -2,12 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import type { TemplateDraftInput } from '@/lib/templates/schema'
 
-type RouteParams = { token: string } | Promise<{ token: string }>
-
-type GetContext = {
-  params: RouteParams
-}
-
 function isExpired(expiresAt: Date | null | undefined): boolean {
   if (!expiresAt) {
     return false
@@ -32,7 +26,10 @@ function extractPrefill(
   return prefill
 }
 
-export async function GET(request: NextRequest, { params }: GetContext) {
+export async function GET(
+  request: NextRequest,
+  { params }: RouteContext<'/api/intakes/[token]'>,
+) {
   try {
     const { token } = await params
 

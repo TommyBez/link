@@ -52,7 +52,6 @@ export async function POST(
               workflowRunId: artifact.workflowRunId,
               blobUrl: artifact.blobUrl,
               sizeBytes: artifact.sizeBytes,
-              checksum: artifact.checksum,
             },
             { status: 200 },
           )

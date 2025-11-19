@@ -1,21 +1,15 @@
 import { type NextRequest, NextResponse } from 'next/server'
-
 import { db } from '@/lib/db'
 import { requireStaff } from '@/lib/server/guard'
 
-type RouteContext = {
-  params: {
-    submissionId: string
-  }
-}
 
 export async function GET(
   _request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<'/api/pdf/[submissionId]/download'>,
 ): Promise<NextResponse> {
   try {
     const auth = await requireStaff()
-    const submissionId = params.submissionId
+    const { submissionId } = await params
 
     if (!submissionId) {
       return NextResponse.json(

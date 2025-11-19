@@ -5,17 +5,14 @@ import { requireStaff } from '@/lib/server/guard'
 
 import { PdfPanel, type PdfStatusState } from './components/pdf-panel'
 
-type PageProps = {
-  params: {
-    id: string
-  }
-}
-
-export default async function SubmissionDetailPage({ params }: PageProps) {
+export default async function SubmissionDetailPage({
+  params,
+}: PageProps<'/submissions/[id]'>) {
   const auth = await requireStaff()
+  const { id } = await params
   const submission = await db.query.submissions.findFirst({
     where: (table, { and, eq }) =>
-      and(eq(table.id, params.id), eq(table.orgId, auth.orgId)),
+      and(eq(table.id, id), eq(table.orgId, auth.orgId)),
     with: {
       pdfArtifact: true,
     },
@@ -31,7 +28,6 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
         workflowRunId: submission.pdfArtifact.workflowRunId,
         blobUrl: submission.pdfArtifact.blobUrl,
         sizeBytes: submission.pdfArtifact.sizeBytes,
-        checksum: submission.pdfArtifact.checksum,
         error: submission.pdfArtifact.error,
       }
     : { status: 'not_started' }

@@ -16,7 +16,6 @@ type ApiResponse = {
   workflowRunId?: string | null
   blobUrl?: string | null
   sizeBytes?: number | null
-  checksum?: string | null
   error?: string | null
 }
 
@@ -26,7 +25,6 @@ export type PdfStatusState =
       workflowRunId?: null
       blobUrl?: null
       sizeBytes?: null
-      checksum?: null
       error?: null
     }
   | {
@@ -34,7 +32,6 @@ export type PdfStatusState =
       workflowRunId: string | null
       blobUrl: string | null
       sizeBytes: number | null
-      checksum: string | null
       error: string | null
     }
 
@@ -70,7 +67,6 @@ export function PdfPanel({ submissionId, initialStatus }: PdfPanelProps) {
           workflowRunId: null,
           blobUrl: null,
           sizeBytes: null,
-          checksum: null,
           error: null,
         }
       }
@@ -80,7 +76,6 @@ export function PdfPanel({ submissionId, initialStatus }: PdfPanelProps) {
         workflowRunId: payload.workflowRunId ?? null,
         blobUrl: payload.blobUrl ?? null,
         sizeBytes: payload.sizeBytes ?? null,
-        checksum: payload.checksum ?? null,
         error: payload.error ?? null,
       }
     },
@@ -214,10 +209,6 @@ export function PdfPanel({ submissionId, initialStatus }: PdfPanelProps) {
         <div>
           <dt className="text-muted-foreground">Dimensione</dt>
           <dd className="font-medium">{formattedSize}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Checksum</dt>
-          <dd className="font-mono text-xs">{status.checksum ?? '—'}</dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Errore</dt>

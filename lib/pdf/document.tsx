@@ -1,14 +1,14 @@
 import {
   Document,
   Page,
-  pdf,
+  renderToBuffer,
   StyleSheet,
   Text,
   View,
 } from '@react-pdf/renderer'
-
+// biome-ignore lint/correctness/noUnusedImports: React PDF requires React
+import React from 'react'
 import type { FieldInput, TemplateDraftInput } from '@/lib/templates/schema'
-
 import { ensurePdfFonts } from './fonts'
 
 type SubmissionForPdf = {
@@ -128,13 +128,11 @@ const styles = StyleSheet.create({
   },
 })
 
-export function createPdfBuffer(payload: SubmissionPdfPayload): Buffer {
+export async function createPdfBuffer(payload: SubmissionPdfPayload) {
   ensurePdfFonts()
 
   const normalized = normalizePayload(payload)
-  const instance = pdf(<SubmissionDocument data={normalized} />)
-
-  return instance.toBuffer()
+  return await renderToBuffer(<SubmissionDocument data={normalized} />)
 }
 
 function SubmissionDocument({ data }: { data: NormalizedPayload }) {
@@ -292,7 +290,7 @@ function formatCheckboxValue(raw: unknown): string {
 
 function formatRadioValue(
   raw: unknown,
-  options: FieldInput['options'],
+  options: Array<{ id: string; label: string }>,
 ): string {
   if (typeof raw !== 'string') {
     return '—'

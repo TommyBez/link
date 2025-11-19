@@ -11,15 +11,15 @@ export function ensurePdfFonts(): void {
     family: 'Inter',
     fonts: [
       {
-        src: 'https://github.com/google/fonts/raw/main/ofl/inter/Inter-Regular.ttf',
+        src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50ujIw2boKoduKmMEVuLyeMZhrib2Bg-4.ttf',
         fontWeight: 400,
       },
       {
-        src: 'https://github.com/google/fonts/raw/main/ofl/inter/Inter-Medium.ttf',
+        src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50ujIw2boKoduKmMEVuLyeMZhrib2Bg-4.ttf',
         fontWeight: 500,
       },
       {
-        src: 'https://github.com/google/fonts/raw/main/ofl/inter/Inter-SemiBold.ttf',
+        src: 'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50ujIw2boKoduKmMEVuLyeMZhrib2Bg-4.ttf',
         fontWeight: 600,
       },
     ],
