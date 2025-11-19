@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireStaff } from '@/lib/server/guard'
 
-
 export async function GET(
   _request: NextRequest,
   { params }: RouteContext<'/api/pdf/[submissionId]/download'>,

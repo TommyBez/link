@@ -2,14 +2,8 @@ import { createPdfBuffer } from '@/lib/pdf/document'
 import type { TemplateDraftInput } from '@/lib/templates/schema'
 import type { SubmissionGraph } from '@/lib/workflows/pdf-generation/types'
 
-export async function createPdfBufferStep(
-  submissionId: string,
-  submission: SubmissionGraph,
-) {
+export async function createPdfBufferStep(submission: SubmissionGraph) {
   'use step'
-  if (!submission) {
-    throw new Error('Submission not found')
-  }
 
   const templateVersion = submission.templateVersion
   if (!templateVersion?.template) {
@@ -21,10 +15,6 @@ export async function createPdfBufferStep(
   }
 
   const schema = templateVersion.schemaJson as TemplateDraftInput
-
-  console.log(
-    `[Create PDF Buffer] Generating PDF buffer for submission: ${submissionId}, Template: ${templateVersion.template.name}, Has signature: ${!!submission.signature}`,
-  )
 
   const pdfBuffer = await createPdfBuffer({
     submission: {
@@ -54,10 +44,6 @@ export async function createPdfBufferStep(
         }
       : undefined,
   })
-
-  console.log(
-    `[Create PDF Buffer] PDF buffer generated successfully. Size: ${pdfBuffer.length} bytes`,
-  )
 
   return pdfBuffer
 }

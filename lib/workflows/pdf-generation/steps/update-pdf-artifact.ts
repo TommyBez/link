@@ -18,10 +18,6 @@ export async function updatePdfArtifact(
     updatedAt: new Date(),
   }
 
-  console.log(
-    `[Update PDF Artifact] Updating artifact for submission: ${submissionId}, Status: ${values.status}`,
-  )
-
   const updated = await db
     .update(pdfArtifacts)
     .set(updatePayload)
@@ -29,17 +25,10 @@ export async function updatePdfArtifact(
     .returning({ id: pdfArtifacts.id })
 
   if (updated.length === 0) {
-    console.log(
-      `[Update PDF Artifact] Creating new artifact record for submission: ${submissionId}`,
-    )
     await db.insert(pdfArtifacts).values({
       submissionId,
       ...values,
       updatedAt: new Date(),
     })
-  } else {
-    console.log(
-      `[Update PDF Artifact] Updated existing artifact record for submission: ${submissionId}`,
-    )
   }
 }
