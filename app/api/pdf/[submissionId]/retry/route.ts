@@ -5,19 +5,13 @@ import { upsertPdfArtifactMeta } from '@/lib/pdf/artifacts'
 import { requireStaff } from '@/lib/server/guard'
 import { generatePdfWorkflow } from '@/lib/workflows/pdf-generation'
 
-type RouteContext = {
-  params: {
-    submissionId: string
-  }
-}
-
 export async function POST(
   _request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<'/api/pdf/[submissionId]/retry'>,
 ): Promise<NextResponse> {
   try {
     const auth = await requireStaff()
-    const submissionId = params.submissionId
+    const { submissionId } = await params
 
     if (!submissionId) {
       return NextResponse.json(
