@@ -1,4 +1,3 @@
-import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { pdfArtifacts } from '@/lib/db/schema'
 import type { PdfArtifactUpdatableFields } from '@/lib/workflows/pdf-generation/types'
@@ -18,17 +17,14 @@ export async function updatePdfArtifact(
     updatedAt: new Date(),
   }
 
-  const updated = await db
-    .update(pdfArtifacts)
-    .set(updatePayload)
-    .where(eq(pdfArtifacts.submissionId, submissionId))
-    .returning({ id: pdfArtifacts.id })
-
-  if (updated.length === 0) {
-    await db.insert(pdfArtifacts).values({
+  await db
+    .insert(pdfArtifacts)
+    .values({
       submissionId,
-      ...values,
-      updatedAt: new Date(),
+      ...updatePayload,
     })
-  }
+    .onConflictDoUpdate({
+      target: pdfArtifacts.submissionId,
+      set: updatePayload,
+    })
 }
