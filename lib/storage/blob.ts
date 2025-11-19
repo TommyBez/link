@@ -16,10 +16,9 @@ export function putSignature(
 }
 
 export function putPdf(name: string, file: Buffer) {
-  return put(`pdfs/${name}`, new Blob([new Uint8Array(file)]), {
+  return put(`pdfs/${name}`, file, {
     access: 'public',
     token: env.BLOB_READ_WRITE_TOKEN,
     contentType: 'application/pdf',
-    addRandomSuffix: false,
   })
 }

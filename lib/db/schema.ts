@@ -33,11 +33,19 @@ export const pdfArtifactStatus = pgEnum('pdf_artifact_status', [
   'failed',
 ] as const)
 
+export const templateVersionStatus = pgEnum('template_version_status', [
+  'draft',
+  'published',
+  'archived',
+] as const)
+
 export type Role = (typeof roles.enumValues)[number]
 export type IntakeSessionStatus =
   (typeof intakeSessionStatus.enumValues)[number]
 export type SubmissionStatus = (typeof submissionStatus.enumValues)[number]
 export type PdfArtifactStatus = (typeof pdfArtifactStatus.enumValues)[number]
+export type TemplateVersionStatus =
+  (typeof templateVersionStatus.enumValues)[number]
 
 // Organizations table
 export const orgs = pgTable(
@@ -103,7 +111,7 @@ export const templates = pgTable(
       .notNull()
       .references(() => orgs.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
-    status: varchar('status', { length: 50 }).notNull(), // 'draft' | 'published' | 'archived'
+    status: templateVersionStatus('status').notNull().default('draft'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -238,6 +246,7 @@ export const pdfArtifacts = pgTable(
     status: pdfArtifactStatus('status').notNull().default('queued'),
     sizeBytes: integer('size_bytes'),
     checksum: varchar('checksum', { length: 64 }),
+    workflowRunId: varchar('workflow_run_id', { length: 255 }),
     error: text('error'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
