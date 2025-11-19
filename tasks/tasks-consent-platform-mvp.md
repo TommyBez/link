@@ -92,12 +92,12 @@ IMPORTANT: As you complete each task, you must check it off in this markdown fil
   - [x] 5.3 Add autosave at step boundaries using `hooks/use-local-progress.ts`
   - [x] 5.4 Validate required fields and ensure accessibility (labels, aria, keyboard)
   - [x] 5.5 Implement `POST /api/submissions` to persist responses and signature reference
-- [ ] 6.0 PDF generation & storage workflow (React-pdf, Workflow Dev Kit, audit page, async status)
-  - [ ] 6.1 Create `lib/pdf/document.tsx` using React-pdf, including audit trail page (submission metadata, signer, timestamps)
-  - [ ] 6.2 Extend `pdfArtifacts` schema for Workflow Dev Kit (add `workflowRunId`, keep `status` enum queued/generating/ready/failed) and generate/apply migration
-  - [ ] 6.3 Implement durable `generatePdfWorkflow(submissionId)` using Workflow Dev Kit to orchestrate DB read, PDF render, blob upload, and `pdfArtifacts` status updates
-  - [ ] 6.4 Implement `POST /api/pdf/[submissionId]/generate` and `GET /api/pdf/[submissionId]/status` to start/idempotently enqueue `generatePdfWorkflow`, store `workflowRunId` on `pdfArtifacts`, and expose queued/generating/ready/failed status to the UI
-  - [ ] 6.5 Implement retry endpoint/action for failed PDF generations (reset `pdfArtifacts` to queued, start a new workflow run) and wire submission detail view to display status and trigger generate/retry
+- [x] 6.0 PDF generation & storage workflow (React-pdf, Workflow Dev Kit, audit page, async status)
+  - [x] 6.1 Create `lib/pdf/document.tsx` using React-pdf, including audit trail page (submission metadata, signer, timestamps)
+  - [x] 6.2 Extend `pdfArtifacts` schema for Workflow Dev Kit (add `workflowRunId`, keep `status` enum queued/generating/ready/failed) and generate/apply migration
+  - [x] 6.3 Implement durable `generatePdfWorkflow(submissionId)` using Workflow Dev Kit to orchestrate DB read, PDF render, blob upload, and `pdfArtifacts` status updates
+  - [x] 6.4 Implement `POST /api/pdf/[submissionId]/generate` and `GET /api/pdf/[submissionId]/status` to start/idempotently enqueue `generatePdfWorkflow`, store `workflowRunId` on `pdfArtifacts`, and expose queued/generating/ready/failed status to the UI
+  - [x] 6.5 Implement retry endpoint/action for failed PDF generations (reset `pdfArtifacts` to queued, start a new workflow run) and wire submission detail view to display status and trigger generate/retry
 - [ ] 7.0 Records search & detail (filters, table) with RBAC download access
   - [ ] 7.1 Implement `GET /api/records` with filters (name, email, phone, date range, status, template)
   - [ ] 7.2 Build `app/(staff)/records/page.tsx` table with filters and sortable columns
